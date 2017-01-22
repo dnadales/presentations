@@ -1,0 +1,166 @@
+#+TITLE: Why use Haskell for doing FP?
+#+REVEAL_THEME: white
+#+REVEAL_TRANS: concave
+#+OPTIONS: reveal_title_slide:"<h2>%t</h2><br><h3>%a</h3>"
+#+OPTIONS: toc:nil
+#+OPTIONS: num:nil
+
+* Prerequisites
+  - You have already heard why functional-programming matters: writting
+    software that is:
+    + modular
+    + maintainable 
+    + understandable
+    + testable
+    + enjoyable to write
+  - You want to find out whether this is indeed true.
+
+
+  #+REVEAL: split
+
+  We share these goals[fn:1]:
+  - Abstractions:
+    - precise
+    - elegant
+    - reusable
+  - Implementations:
+    - correct
+    - efficient
+    - maintainable
+  - Documentation:
+    - clear
+    - simple
+    - accurate
+
+* What is functional-programming
+  - An abused term:
+    - Lambdas?
+    - Map, filter, reduce?
+    - Category theory?
+    - Programming with functions? 
+      # well in this case most Java programs are FP!
+  - What I understand is inline with *denotative* programming:
+    - Nested expression structure
+    - Each expression *denotes* something
+    - Depending only on denotations of sub-expressions.
+
+      
+  #+REVEAL: split
+
+  Example:
+  
+  TODO: Show a non-declarative program and its declarative counterpart.
+  #+BEGIN_SRC java
+  private Int x;
+  y = obj.doSth() // Mutates `x`
+  z = obj.doSthElse(y)
+  // ...
+  return compute(z + x) // Not depending only on subexpressions.
+  #+END_SRC
+
+* About this presentation
+  Goals: Show:
+  - Haskell features *I* like, 
+  - Why it is a suitable mean for learning FP.
+
+* Haskell sucks
+  - Less libraries
+  - Smaller community
+  - String, Text, ByteString, argh!
+  - Namespace could be improved.
+  - Lot's of compiler extensions: comparable to C++ sub-languages (C++
+    is a federation of languages and each team uses a particular
+    sub-set of them).
+  - Lazy: difficult to reason about space-complexity (althoug there are
+    good profiling tools)
+
+* Haskell is easy
+  Keywords[fn:2]:
+  0. [@0] ~->~
+  1. ~=>~
+  2. ~--~
+  3. ~=~
+  4. ~@~
+  5. ~_~
+  6. ~\~
+  7. ~|~
+  8. ~as~
+  #+REVEAL: split
+  9. [@9] ~case ... of~
+  10. ~class~
+  11. ~data~
+  12. ~deriving~
+  13. ~do~
+  14. ~hiding~
+  15. ~import~
+  16. ~if ... then ... else~
+  #+REVEAL: split
+  17. [@17]~let ... in~
+  18. ~module~
+  19. ~newtype~
+  20. ~qualified~
+  21. ~type~
+  22. ~where~
+
+
+  #+REVEAL: split
+     
+  - It is functional-programming what is hard! 
+  - Unlike OO:
+    - dependency injection frameworks,
+    - gang-of-four patterns,
+    - concurrency
+
+* ~n~ things I like about Haskell
+  
+*** More signal to noise ratio
+
+***** Function application is juxtaposition
+
+***** Curried by default
+
+***** Function composition is the dot
+
+*** Lambda expressions 
+
+*** Lists comprehensions 
+*** Algebraic data types
+    
+*** It has a REPL
+  
+*** Declarative
+
+*** Concurrent programming
+
+***** Lightweight threads
+
+***** STM
+
+*** Typeclasses 
+
+*** 
+*** Great extensions 
+
+***** GADT's
+
+***** Rank-N-Types
+
+***** Automatic derivation!
+* Why Haskell for FP (and not Scala)
+
+*** No variance, contra-variance
+    
+
+
+* Is Haskell production ready?
+  - Build tools (stack).
+  - It actually has a mature FP library
+  - ...
+
+* More
+  - http://bob.ippoli.to/why-haskell-2013/
+* Footnotes
+
+[fn:2] https://wiki.haskell.org/Keywords
+
+[fn:1] https://github.com/conal/talk-2014-lambdajam-denotational-design

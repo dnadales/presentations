@@ -115,28 +115,101 @@
   
 *** More signal to noise ratio
 
+***** Function declaration
+      #+BEGIN_SRC haskell
+      hello = "Hello world"
+      #+END_SRC
+
+      No ~function~, ~def~, brackets, etc.
+
 ***** Function application is juxtaposition
+      In a functional language function application is one of the most used
+      operators.
+      #+BEGIN_SRC haskell
+      f x y = 2 * x + y
+      g z = f z z -- (f z) z
+      #+END_SRC
+
+      In Scala:
+      #+BEGIN_SRC scala
+      def f(x: ???, y: ???): ??? = 2 * x + y
+      def f(z: ???): ??? = f (z, z)
+      #+END_SRC
 
 ***** Curried by default
+      No need to decide between:
+      #+BEGIN_SRC scala
+      def willINeedCurry(x, y, z) = ???
+      #+END_SRC
+      or
+      #+BEGIN_SRC scala
+      def willINeedCurry(x)(y)(z) = ???
+      #+END_SRC
+
+      #+BEGIN_SRC haskell
+      def thisIsCurried x y z = undefined
+      #+END_SRC
+***** Infix-operators
+      #+BEGIN_SRC haskell
+      like a b = a ++ " like " ++ b
+      like "dogs" "meat"
+      "pandas" `like` "bamboo"
+      #+END_SRC
+
+***** Separation function types and definitions
+      #+BEGIN_SRC haskell
+      sayHello :: String -> String
+      sayHello name = "Hello " ++ name
+      #+END_SRC
+
+      #+BEGIN_SRC haskell
+      sayHello = ("Hello " ++)
+      #+END_SRC
 
 ***** Function composition is the dot
+      #+BEGIN_SRC haskell
+      screamHello = sayHello . capitalize
+      #+END_SRC
 
-*** Lambda expressions 
-
-*** Lists comprehensions 
-*** Algebraic data types
+*** Lists
     
+*** Lists comprehensions 
+*** Lambda expressions 
+    #+BEGIN_SRC haskell
+    duplicate = map (\x -> x ++ x)
+    res0 = duplicate ["foo", "bar"]
+    #+END_SRC
+*** Algebraic data types
+    #+BEGIN_SRC haskell
+    data MList a = Nil | Cons a (MList a)
+    #+END_SRC
+
+    Compare with:
+    #+BEGIN_SRC scala
+    sealed trait List[+A]
+    case object Nil extends List[Nothing]
+    case class Cons[+A](head: A, tail: List[A]) extends List[A]
+    #+END_SRC
+
+    - Variance
+    - Classes, objects, inheritance
+    - Lots of symbols!
 *** It has a REPL
+    :t, :i, :l, :r
+*** Typeclasses 
   
 *** Declarative
+    quicksort, mergesort
 
+*** Do syntax
+
+*** Side-effects cannot just be introduced anywhere
+    
 *** Concurrent programming
 
 ***** Lightweight threads
 
 ***** STM
-
-*** Typeclasses 
 
 *** 
 *** Great extensions 
@@ -150,7 +223,24 @@
 
 *** No variance, contra-variance
     
+*** No partial application on types 
 
+***** State monad Scala
+      #+BEGIN_SRC scala
+        def stateMonad[S] = new Monad[({type f[x] = State[S,x]})#f] {
+          def unit[A](a: => A): State[S,A] = ???
+          def flatMap[A, B](st: State[S, A])(f: A => State[S,B]): State[S, B] = ???
+        }
+      #+END_SRC
+
+      Yes, I know there is a kind-projector plugin, but still it is more awkward than:
+
+***** State monad Haskell
+      #+BEGIN_SRC haskell
+        instance Monad (State s) where
+          return x = undefined
+          sa >>= fsb = undefined
+      #+END_SRC
 
 * Is Haskell production ready?
   - Build tools (stack).

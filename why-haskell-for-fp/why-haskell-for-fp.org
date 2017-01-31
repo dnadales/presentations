@@ -1,36 +1,29 @@
-#+TITLE: Why use Haskell for doing FP?
-#+REVEAL_THEME: white
-#+REVEAL_TRANS: concave
-#+OPTIONS: reveal_title_slide:"<h2>%t</h2><br><h3>%a</h3>"
-#+OPTIONS: toc:nil
-#+OPTIONS: num:nil
-
 * Prerequisites
-  - You have already heard why functional-programming matters: writting
-    software that is:
-    + modular
-    + maintainable 
-    + understandable
-    + testable
-    + enjoyable to write
-  - You want to find out whether this is indeed true.
 
+*** We have an intuition on why FP matters
+    - You have already heard why functional-programming matters: writting
+      software that is:
+      + modular
+      + maintainable 
+      + understandable
+      + testable
+      + enjoyable to write
+    - You want to find out whether this is indeed true.
 
-  #+REVEAL: split
-
-  We share these goals[fn:1]:
-  - Abstractions:
-    - precise
-    - elegant
-    - reusable
-  - Implementations:
-    - correct
-    - efficient
-    - maintainable
-  - Documentation:
-    - clear
-    - simple
-    - accurate
+*** Our goals
+    We share these goals[fn:1]:
+    - Abstractions:
+      - precise
+      - elegant
+      - reusable
+    - Implementations:
+      - correct
+      - efficient
+      - maintainable
+    - Documentation:
+      - clear
+      - simple
+      - accurate
 
 * What is functional-programming
   - An abused term:
@@ -45,23 +38,21 @@
     - Depending only on denotations of sub-expressions.
 
       
-  #+REVEAL: split
-
-  Example:
-  
-  TODO: Show a non-declarative program and its declarative counterpart.
-  #+BEGIN_SRC java
-  private Int x;
-  y = obj.doSth() // Mutates `x`
-  z = obj.doSthElse(y)
-  // ...
-  return compute(z + x) // Not depending only on subexpressions.
-  #+END_SRC
+*** Example:
+    
+    TODO: Show a non-declarative program and its declarative counterpart.
+    #+BEGIN_SRC java
+    private Int x;
+    y = obj.doSth() // Mutates `x`
+    z = obj.doSthElse(y)
+    // ...
+    return compute(z + x) // Not depending only on subexpressions.
+    #+END_SRC
 
 * About this presentation
   Goals: Show:
   - Haskell features *I* like, 
-  - Why it is a suitable mean for learning FP.
+  - Why *I think* it is a suitable mean for learning FP.
 
 * Haskell sucks
   - Less libraries
@@ -74,46 +65,48 @@
   - Lazy: difficult to reason about space-complexity (althoug there are
     good profiling tools)
 
-* Haskell is easy
-  Keywords[fn:2]:
-  0. [@0] ~->~
-  1. ~=>~
-  2. ~--~
-  3. ~=~
-  4. ~@~
-  5. ~_~
-  6. ~\~
-  7. ~|~
-  8. ~as~
-  #+REVEAL: split
-  9. [@9] ~case ... of~
-  10. ~class~
-  11. ~data~
-  12. ~deriving~
-  13. ~do~
-  14. ~hiding~
-  15. ~import~
-  16. ~if ... then ... else~
-  #+REVEAL: split
-  17. [@17]~let ... in~
-  18. ~module~
-  19. ~newtype~
-  20. ~qualified~
-  21. ~type~
-  22. ~where~
+* Haskell misconceptions
 
+  - Haskell is hard:
+    - The language has barely 22 constructs.
+    - It is functional-programming what is hard.
+      - Unlike OO:
+        - dependency injection frameworks,
+        - gang-of-four patterns,
+        - concurrency
 
-  #+REVEAL: split
-     
-  - It is functional-programming what is hard! 
-  - Unlike OO:
-    - dependency injection frameworks,
-    - gang-of-four patterns,
-    - concurrency
+*** COMMENT Keywords
+    Keywords[fn:2]:
+    0. [@0] ~->~
+    1. ~=>~
+    2. ~--~
+    3. ~=~
+    4. ~@~
+    5. ~_~
+    6. ~\~
+    7. ~|~
+    8. ~as~
+    #+REVEAL: split
+    9. [@9] ~case ... of~
+    10. ~class~
+    11. ~data~
+    12. ~deriving~
+    13. ~do~
+    14. ~hiding~
+    15. ~import~
+    16. ~if ... then ... else~
+    #+REVEAL: split
+    17. [@17]~let ... in~
+    18. ~module~
+    19. ~newtype~
+    20. ~qualified~
+    21. ~type~
+    22. ~where~
+       
 
 * ~n~ things I like about Haskell
   
-*** More signal to noise ratio
+*** Less noise (more power to weight)
 
 ***** Function declaration
       #+BEGIN_SRC haskell
@@ -126,92 +119,190 @@
       In a functional language function application is one of the most used
       operators.
       #+BEGIN_SRC haskell
-      f x y = 2 * x + y
-      g z = f z z -- (f z) z
+        f x y = 2 * x + y
+        g z = f z z -- (f z) z
       #+END_SRC
 
       In Scala:
       #+BEGIN_SRC scala
-      def f(x: ???, y: ???): ??? = 2 * x + y
-      def f(z: ???): ??? = f (z, z)
+        def f(x: ???, y: ???): ??? = 2 * x + y
+        def f(z: ???): ??? = f (z, z)
       #+END_SRC
 
 ***** Curried by default
       No need to decide between:
       #+BEGIN_SRC scala
-      def willINeedCurry(x, y, z) = ???
+        def willINeedCurry(x, y, z) = ???
       #+END_SRC
       or
       #+BEGIN_SRC scala
-      def willINeedCurry(x)(y)(z) = ???
+        def willINeedCurry(x)(y)(z) = ???
       #+END_SRC
 
       #+BEGIN_SRC haskell
-      def thisIsCurried x y z = undefined
+        thisIsCurried x y z = undefined
       #+END_SRC
+
+      One less thing to worry about!
+
 ***** Infix-operators
+      Ready to use!
       #+BEGIN_SRC haskell
-      like a b = a ++ " like " ++ b
-      like "dogs" "meat"
-      "pandas" `like` "bamboo"
+        like a b = a ++ " like " ++ b
+        like "dogs" "meat"
+        "pandas" `like` "bamboo"
       #+END_SRC
 
 ***** Separation function types and definitions
       #+BEGIN_SRC haskell
-      sayHello :: String -> String
-      sayHello name = "Hello " ++ name
+        sayHello :: String -> String
+        sayHello name = "Hello " ++ name
       #+END_SRC
 
+      Partial application, and point free syntax:
       #+BEGIN_SRC haskell
-      sayHello = ("Hello " ++)
+        sayHello = ("Hello " ++)
       #+END_SRC
 
 ***** Function composition is the dot
+      Because ~andThen~ is way too long...
       #+BEGIN_SRC haskell
-      screamHello = sayHello . capitalize
+        screamHello = sayHello . capitalize
       #+END_SRC
 
 *** Lists
+    Lists are the workhorse of functional-programming.
+    #+BEGIN_SRC haskell
+      countries = ["The Netherlands", "Poland", "Turkey", "India", "Argentina"]
+      evenNumbers = [0, 2, 4]
+    #+END_SRC
     
-*** Lists comprehensions 
+***** Lists comprehensions 
+      #+BEGIN_SRC haskell
+        oddNumbers = [ i * 2 + 1 | i <- [0..]]
+        pairs = [(i,j) | i <- [1,2], j <- [1..4]
+      #+END_SRC
+
+      Can't get any more mathematical than this...
+
 *** Lambda expressions 
     #+BEGIN_SRC haskell
-    duplicate = map (\x -> x ++ x)
-    res0 = duplicate ["foo", "bar"]
+      duplicate = map (\x -> x ++ x)
+      res0 = duplicate ["foo", "bar"]
     #+END_SRC
+
 *** Algebraic data types
     #+BEGIN_SRC haskell
-    data MList a = Nil | Cons a (MList a)
+      data MList a = Nil | Cons a (MList a)
     #+END_SRC
 
     Compare with:
     #+BEGIN_SRC scala
-    sealed trait List[+A]
-    case object Nil extends List[Nothing]
-    case class Cons[+A](head: A, tail: List[A]) extends List[A]
+      sealed trait List[+A]
+      case object Nil extends List[Nothing]
+      case class Cons[+A](head: A, tail: List[A]) extends List[A]
     #+END_SRC
 
+    No need to worry about:
     - Variance
     - Classes, objects, inheritance
     - Lots of symbols!
-*** It has a REPL
-    :t, :i, :l, :r
-*** Typeclasses 
-  
-*** Declarative
-    quicksort, mergesort
 
-*** Do syntax
+*** TODO It has a REPL
+    :t, :i, :l, :r
+
+*** Typeclasses
+    Full blown FP makes extensive use of *typeclasses*.
+
+    
+***** A Scala Monoid and an instance
+      #+BEGIN_SRC scala
+        trait Monoid[A] {
+          def empty: A
+          def combine(x: A, y: A): A
+        }
+
+        // Implementation for Int
+        val intAdditionMonoid: Monoid[Int] = new Monoid[Int] {
+          def empty: Int = 0
+          def combine(x: Int, y: Int): Int = x + y
+        }    
+      #+END_SRC
+
+***** A Haskell Monoid and an instance
+      #+BEGIN_SRC haskell
+        class Monoid a where
+          mempty  :: a
+          mappend :: a -> a -> a
+
+        instance Monoid Int where
+          mempty = 0
+          mappend = +
+      #+END_SRC
+      - Give things the right name: it is not a plane, it is not a bird, it is
+        not a ~val~, it is an ~instance~!
+
+***** Derived instances
+      When things start to get hairy...
+
+******* Deriving instances in Scala
+        #+BEGIN_SRC scala
+          final case class Pair[A, B](first: A, second: B)
+
+          def deriveMonoidPair[A, B](A: Monoid[A], B: Monoid[B]): Monoid[Pair[A, B]] =
+            new Monoid[Pair[A, B]] {
+              def empty: Pair[A, B] = Pair(A.empty, B.empty)
+
+              def combine(x: Pair[A, B], y: Pair[A, B]): Pair[A, B] =
+                Pair(A.combine(x.first, y.first), B.combine(x.second, y.second))
+            }
+        #+END_SRC
+
+******* Deriving instances in Haskell
+        #+BEGIN_SRC haskell
+          instance (Monoid a, Monoid b) => Monoid (a, b) where
+            mempty = (mempty, mempty) -- No A.empty, B.empty, let the compiler work for
+                                      -- us and we use our time to do cool stuff.
+            mappend (a1, b1) `mappend` (a2, b2) =
+              (a1 `mappend` a2, b1 `mappend` b2)
+        #+END_SRC
+        We can almost read this!
+
+*** Declarative
+
+***** Quicksort Scala
+      #+BEGIN_SRC scala
+        def qsort[T <% Ordered[T]](list: List[T]): List[T] = {
+          list match {
+          case Nil => Nil     
+          case x::xs =>        
+            val (before, after) = xs partition (_ < x)
+            qsort(before) ++ (x :: qsort(after))
+          }
+        }      
+      #+END_SRC
+
+***** Quicksort 
+      #+BEGIN_SRC haskell
+        qsort :: Ord a => [a] -> [a]
+        qsort [] = []
+        qsort (x:xs) = qsort [b | b <- xs, b <= x] ++ [x] ++ qsort [a | a <- xs, x < a]
+      #+END_SRC
+      
+*** TODO Do syntax
+    - No ~yield~ required the end.
+    - No dummy ~<-~.
 
 *** Side-effects cannot just be introduced anywhere
-    
+
+*** Composing effects via monad transformers
+    Show your example from SO.
 *** Concurrent programming
 
 ***** Lightweight threads
 
 ***** STM
 
-*** 
 *** Great extensions 
 
 ***** GADT's
@@ -242,6 +333,8 @@
           sa >>= fsb = undefined
       #+END_SRC
 
+*** TODO Add also material from these references
+    https://www.reddit.com/r/haskell/comments/3h7fqr/what_are_haskellers_critiques_of_scala/
 * Is Haskell production ready?
   - Build tools (stack).
   - It actually has a mature FP library

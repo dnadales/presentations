@@ -25,6 +25,7 @@
       - simple
       - accurate
 
+
 * What is functional-programming
   - An abused term:
     - Lambdas?
@@ -69,11 +70,14 @@
 
   - Haskell is hard:
     - The language has barely 22 constructs.
+      - The language doesn't even have exceptions!
     - It is functional-programming what is hard.
       - Unlike OO:
         - dependency injection frameworks,
         - gang-of-four patterns,
         - concurrency
+  - Haskell is not a GP language:
+    - every domain in which Java is used Haskell can be used as well!
 
 *** COMMENT Keywords
     Keywords[fn:2]:
@@ -107,7 +111,6 @@
 * ~n~ things I like about Haskell
   
 *** Less noise (more power to weight)
-
 ***** Function declaration
       #+BEGIN_SRC haskell
       hello = "Hello world"
@@ -120,13 +123,13 @@
       operators.
       #+BEGIN_SRC haskell
         f x y = 2 * x + y
-        g z = f z z -- (f z) z
+        g z = f z z -- Equivalent to: (f z) z
       #+END_SRC
 
       In Scala:
       #+BEGIN_SRC scala
         def f(x: ???, y: ???): ??? = 2 * x + y
-        def f(z: ???): ??? = f (z, z)
+        def g(z: ???): ??? = f (z, z)
       #+END_SRC
 
 ***** Curried by default
@@ -143,7 +146,8 @@
         thisIsCurried x y z = undefined
       #+END_SRC
 
-      One less thing to worry about!
+      One less thing to worry about! See the paradox of choice (having too many
+      choices can be counter-productive).
 
 ***** Infix-operators
       Ready to use!
@@ -180,7 +184,7 @@
 ***** Lists comprehensions 
       #+BEGIN_SRC haskell
         oddNumbers = [ i * 2 + 1 | i <- [0..]]
-        pairs = [(i,j) | i <- [1,2], j <- [1..4]
+        pairs = [(i,j) | i <- [1,2], j <- [1..4]]
       #+END_SRC
 
       Can't get any more mathematical than this...
@@ -193,7 +197,7 @@
 
 *** Algebraic data types
     #+BEGIN_SRC haskell
-      data MList a = Nil | Cons a (MList a)
+      data List a = Nil | Cons a (List a)
     #+END_SRC
 
     Compare with:
@@ -203,13 +207,22 @@
       case class Cons[+A](head: A, tail: List[A]) extends List[A]
     #+END_SRC
 
+    Who can write without googling it a definition for ~prepend~ in scala
+    without googling it up? Hint:
+    #+BEGIN_SRC scala
+    def prepend(elem: ???): ??? = new Cons(elem, this)
+    #+END_SRC
+
     No need to worry about:
     - Variance
     - Classes, objects, inheritance
     - Lots of symbols!
 
-*** TODO It has a REPL
-    :t, :i, :l, :r
+*** It has a REPL
+    - :t :: type information
+    - :k :: kind information (type of a type)
+    - :i :: information of a symbol
+    - :l :: load a file
 
 *** Typeclasses
     Full blown FP makes extensive use of *typeclasses*.
@@ -289,33 +302,216 @@
         qsort (x:xs) = qsort [b | b <- xs, b <= x] ++ [x] ++ qsort [a | a <- xs, x < a]
       #+END_SRC
       
-*** TODO Do syntax
+*** Do syntax
+    Like for comprehensions in Scala:
+    #+BEGIN_SRC scala
+      def inc: IRWS[Int, List[String], Counter, Counter, Unit] = for {
+        v ← SM.ask
+        c ← SM.get
+        _ ← SM.tell(List(s"Incrementing $c by $v "))
+        _ ← SM.modify(counter ⇒ Counter(counter.value + v))
+      } yield ()
+    #+END_SRC
+
+    #+BEGIN_SRC haskell
+      inc :: (MonadReader Int m, MonadState Counter m, MonadWriter [Counter] m) => m ()
+      -- inc = ask >>= incWith >> get >>= tell . (:[])
+      inc = do
+        v <- ask
+        incWith v
+        s <- get
+        tell [s]
+    #+END_SRC
     - No ~yield~ required the end.
     - No dummy ~<-~.
 
 *** Side-effects cannot just be introduced anywhere
-
+    - Haskell ahs no assignment
+    - There are no global variables
+    - No IO in pure code. Period. 
+      - The program just won't type check 
+        #+BEGIN_SRC haskell
+          myPureFunction :: String -> String
+          myPureFunction xs =
+            if xs == [] then putStrLn "Empty String!"; [] else xs
+        #+END_SRC
+    - Discipline:
+      - Curse now, be thankful later.
+    - Forces you to think in a different way.
 *** Composing effects via monad transformers
     Show your example from SO.
-*** Concurrent programming
 
-***** Lightweight threads
+    #+BEGIN_SRC haskell
+      newtype Counter = Counter Int deriving (Eq)
+
+      instance Show Counter where
+        show (Counter i) = show i
+
+      incWith :: MonadState Counter m => Int -> m ()
+      incWith n = let incCounter n' (Counter i) = Counter $ i + n'
+                  in modify (incCounter n)
+
+      inc :: (MonadReader Int m, MonadState Counter m, MonadWriter [Counter] m) => m ()
+      inc = ask >>= incWith >> get >>= tell . (:[])
+
+      compute :: (MonadReader Int m, MonadState Counter m, MonadWriter [Counter] m) => m ()
+      compute =
+        local (const 3) $ do
+          inc
+          inc
+          inc
+          local (const 5) $ do
+            inc
+            inc    
+    #+END_SRC
+
+    Implement this in Scala. I dare you.
+***** Monad transformers are not easy to compose
+      Scala developers have to resort to hard-coded monad transformer stacks
+      (~ReaderWriterState~, ~Task~, etc.):
+
+      #+BEGIN_SRC scala
+        import scalaz._
+          import Scalaz._
+          val SM = ReaderWriterState.rwstMonad[Id, Int, List[String], Counter]
+
+          case class Counter(value: Int)
+
+          def incWith(n: Int): State[Counter, Unit] = for {
+            v ← get[Counter]
+            _ ← put(Counter(v.value + n))
+          } yield ()
+
+          def inc: IRWS[Int, List[String], Counter, Counter, Unit] = for {
+            v ← SM.ask
+            c ← SM.get
+            _ ← SM.tell(List(s"Incrementing $c by $v "))
+            _ ← SM.modify(counter ⇒ Counter(counter.value + v))
+          } yield ()
+
+          def compute: IRWS[Int, List[String], Counter, Counter, Unit] = {
+            for {
+              _ <- SM.local[Unit](i ⇒ 3)(for {
+                _ ← inc
+                _ ← inc
+                _ ← inc
+              } yield ())
+              _ <- SM.local[Unit](i ⇒ 5)(for {
+                _ ← inc
+                _ ← inc
+                _ ← inc
+              } yield ())
+            } yield ()
+          }      
+      #+END_SRC
+*** Parallel and concurrent programming
+    Libraries for concurrent programming are amazing.
 
 ***** STM
+      This is how easy it is to solve the philosophers-problem:
+      #+BEGIN_SRC Haskell
+        moveWindowSTM :: Display -> Window -> Desktop -> Desktop -> STM ()
+        moveWindowSTM disp win a b = 
+          wa <- readTVar ma
+          writeTVar ma (Set.delete win wa)
+          wb <- readTVar mb
+          writeTVar mb (Set.insert win wb)
+          where
+            ma = disp ! a
+            mb = disp ! b
+      #+END_SRC
+      
+      And ~STM~ are monads, and therefore they compose:
+      #+BEGIN_SRC haskell
+        swapWindows disp w a v b = atomically $ do 
+          moveWindowSTM disp w a b
+          moveWindowSTM disp v b a
+      #+END_SRC
 
+*** Higher-kinded types 
+    With type-kinds we can abstract over types:
+    #+BEGIN_SRC haskell
+      data RoseTree a = RLeaf a
+                      | RNode (List (RoseTree a))
+
+      data BinTree a = BLeaf a
+                     | BNode (Pair (BinTree a))
+
+      data Pair a = MkPair a a
+    #+END_SRC
+
+    Note the similar pattern in the definitions of ~RoseTree~ and ~BinTree~. We
+    are repeating ourselves! We can abstract this as follows:
+    #+BEGIN_SRC haskell
+      data Tree f a = Leaf a
+                    | Tree (f (Tree f a))
+
+      type RoseTree a = Tree List a
+      type BinTree a = Tree Pair a
+    #+END_SRC
+
+    If your language gets in your way and prevents this kind of reuse you will
+    be almost forced to repeat yourself because it is easier!
+
+    But the fun does not stop here. See PolyKinds!
+    #+BEGIN_SRC haskell
+      data T (f :: k -> *) a = MkT (f a)
+    #+END_SRC
 *** Great extensions 
 
 ***** GADT's
+      #+BEGIN_SRC haskell
+        data Expr a where
+          I :: Int -> Expr Int
+          B :: Bool -> Expr Bool
+          Add :: Expr Int -> Expr Int -> Expr Int
+          Eq :: (Eq a) => Expr a -> Expr a -> Expr Bool
+      #+END_SRC
 
+      You can detect errors at compile time:
+      #+BEGIN_SRC haskell
+        eRight = (I 5 `Add` I 1) `Eq` I 7
+        eWrong = (B True) `Add` I 5 -- Won't type check since 'B True' does not
+                                    -- have type 'Expr Int'!
+        eAlsoWrong = I 5 `Eq` B False
+      #+END_SRC
+      Try to define a type-safe EDSL in the language you like.
 ***** Rank-N-Types
+      Consider the following function:
+      #+BEGIN_SRC haskell
+      sumFs f xs ys = (f xs) + (f ys)
+      #+END_SRC
 
+      What is its type? The compiler will infer the following type:
+      #+BEGIN_SRC haskell
+      sumFs :: Num a => (t -> a) -> t -> t -> a
+      #+END_SRC
+
+      But this means we cannot simply call:
+      #+BEGIN_SRC haskell
+      sumFs length "hello" [0, 1, 2]
+      #+END_SRC
+
+      Enter rank-n-types:
+      #+BEGIN_SRC haskell
+      sumPolyFs :: (forall a. [a] -> Int) -> [b] -> [c] -> Int
+      sumPolyFs f xs ys = f xs + f ys
+      #+END_SRC
+
+      Now we can call:
+      #+BEGIN_SRC hakell
+      sumPolyFs length "hello" [0, 1, 2]
+      #+END_SRC
 ***** Automatic derivation!
-* Why Haskell for FP (and not Scala)
-
-*** No variance, contra-variance
-    
-*** No partial application on types 
-
+      Derive (trival) functors, monads, and the like for free!
+      #+BEGIN_SRC haskell
+        {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+        newtype App a = App { unApp :: ReaderT Config (StateT AppState IO) a }
+                        deriving (Monad, MonadReader Config,
+                                  MonadState AppState, MonadIO)      
+      #+END_SRC
+      https://ocharles.org.uk/blog/guest-posts/2014-12-15-deriving.html
+*** Partial application on types
 ***** State monad Scala
       #+BEGIN_SRC scala
         def stateMonad[S] = new Monad[({type f[x] = State[S,x]})#f] {
@@ -333,15 +529,24 @@
           sa >>= fsb = undefined
       #+END_SRC
 
-*** TODO Add also material from these references
-    https://www.reddit.com/r/haskell/comments/3h7fqr/what_are_haskellers_critiques_of_scala/
 * Is Haskell production ready?
   - Build tools (stack).
   - It actually has a mature FP library
   - ...
+* Summary
+  - Haskell is the right tool for learning FP
+  - I showed an incomplete list of why I like about the language, but you might
+    like other aspects!
+  - Where to go from here
+    - Haskell/FP study group?
+      - Two lunches a week.
+
 
 * More
   - http://bob.ippoli.to/why-haskell-2013/
+  - 
+     https://www.reddit.com/r/haskell/comments/1pjjy5/odersky_the_trouble_with_types_strange_loop_2013/cd3bgcu/
+  - https://github.com/fpinscala/fpinscala/wiki/A-brief-introduction-to-Haskell,-and-why-it-matters
 * Footnotes
 
 [fn:2] https://wiki.haskell.org/Keywords

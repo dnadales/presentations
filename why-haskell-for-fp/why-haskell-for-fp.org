@@ -535,6 +535,12 @@
   - ...
 * Summary
   - Haskell is the right tool for learning FP
+    - Less cluttered language/Less concepts
+    - FP concepts are directly supported (no need to write FP-assembly)
+    - Monad transformers are easy to compose
+    - Discipline: you're (kind of) forced to write functional code! No way to
+      cheat with imperative code.
+
   - I showed an incomplete list of why I like about the language, but you might
     like other aspects!
   - Where to go from here

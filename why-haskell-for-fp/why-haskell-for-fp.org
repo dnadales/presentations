@@ -111,14 +111,22 @@
 * ~n~ things I like about Haskell
   
 *** Less noise (more power to weight)
-***** Function declaration
+***** DONE Function declaration
+      CLOSED: [2017-02-08 Wed 16:56]
+      :LOGBOOK:
+      - State "DONE"       from              [2017-02-08 Wed 16:56]
+      :END:
       #+BEGIN_SRC haskell
       hello = "Hello world"
       #+END_SRC
 
       No ~function~, ~def~, brackets, etc.
 
-***** Function application is juxtaposition
+***** DONE Function application is juxtaposition
+      CLOSED: [2017-02-08 Wed 16:55]
+      :LOGBOOK:
+      - State "DONE"       from              [2017-02-08 Wed 16:55]
+      :END:
       In a functional language function application is one of the most used
       operators.
       #+BEGIN_SRC haskell
@@ -132,7 +140,11 @@
         def g(z: ???): ??? = f (z, z)
       #+END_SRC
 
-***** Curried by default
+***** DONE Curried by default
+      CLOSED: [2017-02-08 Wed 16:55]
+      :LOGBOOK:
+      - State "DONE"       from              [2017-02-08 Wed 16:55]
+      :END:
       No need to decide between:
       #+BEGIN_SRC scala
         def willINeedCurry(x, y, z) = ???
@@ -149,7 +161,11 @@
       One less thing to worry about! See the paradox of choice (having too many
       choices can be counter-productive).
 
-***** Infix-operators
+***** DONE Infix-operators
+      CLOSED: [2017-02-08 Wed 16:55]
+      :LOGBOOK:
+      - State "DONE"       from              [2017-02-08 Wed 16:55]
+      :END:
       Ready to use!
       #+BEGIN_SRC haskell
         like a b = a ++ " like " ++ b
@@ -157,7 +173,11 @@
         "pandas" `like` "bamboo"
       #+END_SRC
 
-***** Separation function types and definitions
+***** DONE Separation function types and definitions
+      CLOSED: [2017-02-08 Wed 16:55]
+      :LOGBOOK:
+      - State "DONE"       from              [2017-02-08 Wed 16:55]
+      :END:
       #+BEGIN_SRC haskell
         sayHello :: String -> String
         sayHello name = "Hello " ++ name
@@ -168,13 +188,21 @@
         sayHello = ("Hello " ++)
       #+END_SRC
 
-***** Function composition is the dot
+***** DONE Function composition is the dot
+      CLOSED: [2017-02-08 Wed 16:55]
+      :LOGBOOK:
+      - State "DONE"       from              [2017-02-08 Wed 16:55]
+      :END:
       Because ~andThen~ is way too long...
       #+BEGIN_SRC haskell
         screamHello = sayHello . capitalize
       #+END_SRC
 
-*** Lists
+*** DONE Lists
+    CLOSED: [2017-02-08 Wed 16:55]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:55]
+    :END:
     Lists are the workhorse of functional-programming.
     #+BEGIN_SRC haskell
       countries = ["The Netherlands", "Poland", "Turkey", "India", "Argentina"]
@@ -189,13 +217,21 @@
 
       Can't get any more mathematical than this...
 
-*** Lambda expressions 
+*** DONE Lambda expressions 
+    CLOSED: [2017-02-08 Wed 16:55]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:55]
+    :END:
     #+BEGIN_SRC haskell
       duplicate = map (\x -> x ++ x)
       res0 = duplicate ["foo", "bar"]
     #+END_SRC
 
-*** Algebraic data types
+*** DONE Algebraic data types
+    CLOSED: [2017-02-08 Wed 16:55]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:55]
+    :END:
     #+BEGIN_SRC haskell
       data List a = Nil | Cons a (List a)
     #+END_SRC
@@ -218,13 +254,21 @@
     - Classes, objects, inheritance
     - Lots of symbols!
 
-*** It has a REPL
+*** DONE It has a REPL
+    CLOSED: [2017-02-08 Wed 16:55]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:55]
+    :END:
     - :t :: type information
     - :k :: kind information (type of a type)
     - :i :: information of a symbol
     - :l :: load a file
 
-*** Typeclasses
+*** DONE Typeclasses
+    CLOSED: [2017-02-08 Wed 16:55]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:55]
+    :END:
     Full blown FP makes extensive use of *typeclasses*.
 
     
@@ -281,7 +325,11 @@
         #+END_SRC
         We can almost read this!
 
-*** Declarative
+*** DONE Declarative
+    CLOSED: [2017-02-08 Wed 16:55]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:55]
+    :END:
 
 ***** Quicksort Scala
       #+BEGIN_SRC scala
@@ -302,7 +350,11 @@
         qsort (x:xs) = qsort [b | b <- xs, b <= x] ++ [x] ++ qsort [a | a <- xs, x < a]
       #+END_SRC
       
-*** Do syntax
+*** DONE Do syntax
+    CLOSED: [2017-02-08 Wed 16:53]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:53]
+    :END:
     Like for comprehensions in Scala:
     #+BEGIN_SRC scala
       def inc: IRWS[Int, List[String], Counter, Counter, Unit] = for {
@@ -325,8 +377,12 @@
     - No ~yield~ required the end.
     - No dummy ~<-~.
 
-*** Side-effects cannot just be introduced anywhere
-    - Haskell ahs no assignment
+*** DONE Side-effects cannot just be introduced anywhere
+    CLOSED: [2017-02-08 Wed 16:51]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:51]
+    :END:
+    - Haskell has no assignment
     - There are no global variables
     - No IO in pure code. Period. 
       - The program just won't type check 
@@ -338,7 +394,11 @@
     - Discipline:
       - Curse now, be thankful later.
     - Forces you to think in a different way.
-*** Composing effects via monad transformers
+*** DONE Composing effects via monad transformers
+    CLOSED: [2017-02-08 Wed 16:45]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:45]
+    :END:
     Show your example from SO.
 
     #+BEGIN_SRC haskell
@@ -404,12 +464,16 @@
             } yield ()
           }      
       #+END_SRC
-*** Parallel and concurrent programming
+*** DONE Parallel and concurrent programming
+    CLOSED: [2017-02-08 Wed 16:31]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:31]
+    :END:
     Libraries for concurrent programming are amazing.
 
 ***** STM
       This is how easy it is to solve the philosophers-problem:
-      #+BEGIN_SRC Haskell
+      #+BEGIN_SRC haskell
         moveWindowSTM :: Display -> Window -> Desktop -> Desktop -> STM ()
         moveWindowSTM disp win a b = 
           wa <- readTVar ma
@@ -428,7 +492,11 @@
           moveWindowSTM disp v b a
       #+END_SRC
 
-*** Higher-kinded types 
+*** DONE Higher-kinded types 
+    CLOSED: [2017-02-08 Wed 16:45]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:45]
+    :END:
     With type-kinds we can abstract over types:
     #+BEGIN_SRC haskell
       data RoseTree a = RLeaf a
@@ -457,7 +525,11 @@
     #+BEGIN_SRC haskell
       data T (f :: k -> *) a = MkT (f a)
     #+END_SRC
-*** Great extensions 
+*** DONE Great extensions 
+    CLOSED: [2017-02-08 Wed 16:45]
+    :LOGBOOK:
+    - State "DONE"       from "TODO"       [2017-02-08 Wed 16:45]
+    :END:
 
 ***** GADT's
       #+BEGIN_SRC haskell
@@ -511,7 +583,11 @@
                                   MonadState AppState, MonadIO)      
       #+END_SRC
       https://ocharles.org.uk/blog/guest-posts/2014-12-15-deriving.html
-*** Partial application on types
+*** DONE Partial application on types
+    CLOSED: [2017-02-08 Wed 16:24]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-08 Wed 16:24]
+    :END:
 ***** State monad Scala
       #+BEGIN_SRC scala
         def stateMonad[S] = new Monad[({type f[x] = State[S,x]})#f] {

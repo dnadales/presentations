@@ -1,4 +1,4 @@
-% Why using Haskell for learning functional-programming
+% Why using Haskell for doing functional-programming
 % Damian Nadales
 % February 6, 2017
 
@@ -132,10 +132,10 @@ def qsort[T <% Ordered[T]](list: List[T]): List[T] = {
 ## For comprehensions in Scala
 ```haskell
 def inc: IRWS[Int, List[String], Counter, Counter, Unit] = for {
-  v ← SM.ask
-  c ← SM.get
-  _ ← SM.tell(List(s"Incrementing $c by $v "))
-  _ ← SM.modify(counter ⇒ Counter(counter.value + v))
+  v <- SM.ask
+  c <- SM.get
+  _ <- SM.tell(List(s"Incrementing $c by $v "))
+  _ <- SM.modify(counter ⇒ Counter(counter.value + v))
 } yield ()
 ```
 
@@ -150,6 +150,9 @@ inc = do
   s <- get
   tell [s]
 ```
+
+- No `yield` required the end.
+- No dummy `<-`.
 
 # Direct support for FP
 
@@ -197,8 +200,7 @@ No need to worry about:
 
 ## Mini-challenge
 
-Who can write without googling it a definition for `prepend` in Scala without
-googling it up? Hint:
+Can you write a definition for `prepend` in Scala without googling it up? Hint:
 
 ```scala
 def prepend(elem: ???): ??? = new Cons(elem, this)
@@ -242,7 +244,7 @@ instance Monoid Int where
 Call things for what they are: is not a plane, it is not a bird, it is not a
 `def`, it is not a `val`, it is an `instance`!
 
-## Typeclasses can be used to constraint functions
+## Typeclasses can be used to constrain functions
 
 ```haskell
 class Ord a where
@@ -346,28 +348,28 @@ import scalaz._
   case class Counter(value: Int)
 
   def incWith(n: Int): State[Counter, Unit] = for {
-    v ← get[Counter]
-    _ ← put(Counter(v.value + n))
+    v <- get[Counter]
+    _ <- put(Counter(v.value + n))
   } yield ()
 
   def inc: IRWS[Int, List[String], Counter, Counter, Unit] = for {
-    v ← SM.ask
-    c ← SM.get
-    _ ← SM.tell(List(s"Incrementing $c by $v "))
-    _ ← SM.modify(counter ⇒ Counter(counter.value + v))
+    v <- SM.ask
+    c <- SM.get
+    _ <- SM.tell(List(s"Incrementing $c by $v "))
+    _ <- SM.modify(counter ⇒ Counter(counter.value + v))
   } yield ()
 
   def compute: IRWS[Int, List[String], Counter, Counter, Unit] = {
     for {
       _ <- SM.local[Unit](i ⇒ 3)(for {
-        _ ← inc
-        _ ← inc
-        _ ← inc
+        _ <- inc
+        _ <- inc
+        _ <- inc
       } yield ())
       _ <- SM.local[Unit](i ⇒ 5)(for {
-        _ ← inc
-        _ ← inc
-        _ ← inc
+        _ <- inc
+        _ <- inc
+        _ <- inc
       } yield ())
     } yield ()
   }

@@ -1,4 +1,8 @@
-* Prerequisites
+* DONE Prerequisites
+  CLOSED: [2017-02-09 Thu 23:42]
+  :LOGBOOK:
+  - State "DONE"       from              [2017-02-09 Thu 23:42]
+  :END:
 
 *** We have an intuition on why FP matters
     - You have already heard why functional-programming matters: writting
@@ -26,7 +30,11 @@
       - accurate
 
 
-* What is functional-programming
+* DONE What is functional-programming
+  CLOSED: [2017-02-09 Thu 23:42]
+  :LOGBOOK:
+  - State "DONE"       from              [2017-02-09 Thu 23:42]
+  :END:
   - An abused term:
     - Lambdas?
     - Map, filter, reduce?
@@ -39,7 +47,11 @@
     - Depending only on denotations of sub-expressions.
 
       
-*** Example:
+*** DONE Example:
+    CLOSED: [2017-02-09 Thu 23:42]
+    :LOGBOOK:
+    - State "DONE"       from              [2017-02-09 Thu 23:42]
+    :END:
     
     TODO: Show a non-declarative program and its declarative counterpart.
     #+BEGIN_SRC java
@@ -50,12 +62,20 @@
     return compute(z + x) // Not depending only on subexpressions.
     #+END_SRC
 
-* About this presentation
+* DONE About this presentation
+  CLOSED: [2017-02-09 Thu 23:43]
+  :LOGBOOK:
+  - State "DONE"       from              [2017-02-09 Thu 23:43]
+  :END:
   Goals: Show:
   - Haskell features *I* like, 
   - Why *I think* it is a suitable mean for learning FP.
 
-* Haskell sucks
+* DONE Haskell sucks
+  CLOSED: [2017-02-09 Thu 23:45]
+  :LOGBOOK:
+  - State "DONE"       from              [2017-02-09 Thu 23:45]
+  :END:
   - Less libraries
   - Smaller community
   - String, Text, ByteString, argh!
@@ -616,6 +636,7 @@
     - Monad transformers are easy to compose
     - Discipline: you're (kind of) forced to write functional code! No way to
       cheat with imperative code.
+    - Performance does not suffer for writing functional code.
 
   - I showed an incomplete list of why I like about the language, but you might
     like other aspects!

@@ -2,6 +2,129 @@
 % Damian Nadales
 % February 6, 2017
 
+# Prerequisites
+
+## We share some common ground 
+
+- You have already heard why functional-programming matters: writing software
+  that is:
+    - modular
+    - maintainable 
+    - understandable
+    - testable
+    - enjoyable to write
+  
+- You want to find out whether this is indeed true.
+
+## We share some common [goals](https://github.com/conal/talk-2014-lambdajam-denotational-design)
+
+- Abstractions:
+    - Precise.
+    - Elegant.
+    - Reusable.
+- Implementations:
+    - Correct.
+    - Efficient.
+    - Maintainable
+- Documentation:
+    - Clear.
+    - Simple.
+    - Accurate.
+    
+## What is functional programming
+
+- An abused term:
+    - Lambdas?
+    - Map, filter, reduce?
+    - Category theory?
+    - Programming with functions? 
+
+- What I understand is inline with *denotative* programming:
+    - Nested expression structure
+    - Each expression *denotes* something
+    - Depending only on denotations of sub-expressions.
+
+## A non-denotative program
+A parser for prefixes of HTTP 1.1 requests (e.g. "HTTP/1.1\r\n")
+
+```java
+public class HttpResponseParser extends AbstractMessageParser {
+
+    private final HttpResponseFactory responseFactory;
+    private final CharArrayBuffer lineBuf;
+
+    public HttpResponseParser(
+            final SessionInputBuffer buffer,
+            final LineParser parser,
+            final HttpResponseFactory responseFactory,
+            final HttpParams params) {
+        super(buffer, parser, params);
+        if (responseFactory == null) {
+            throw new IllegalArgumentException("Response factory may not be null");
+        }
+        this.responseFactory = responseFactory;
+        this.lineBuf = new CharArrayBuffer(128);
+    }
+    
+    protected HttpMessage parseHead(
+            final SessionInputBuffer sessionBuffer)
+        throws IOException, HttpException, ParseException {
+
+        this.lineBuf.clear();
+        int i = sessionBuffer.readLine(this.lineBuf);
+        if (i == -1) {
+            throw new NoHttpResponseException("The target server failed to respond");
+        }
+        //create the status line from the status string
+        ParserCursor cursor = new ParserCursor(0, this.lineBuf.length());
+        StatusLine statusline = lineParser.parseStatusLine(this.lineBuf, cursor);
+        return this.responseFactory.newHttpResponse(statusline, null);
+    }
+}
+```
+
+## A denotative counterpart
+
+```haskell
+httpResponseParser = (,) <$> (string "HTTP/" *> number <* string ".") 
+                         <*> number
+```
+
+# About this presentation
+
+## Goals
+
+Show:
+
+- An *incomplete* list of Haskell features *I* like.
+- Why *I think* it is suitable for learning and doing serious FP.
+
+# Before we start
+
+## Haskell sucks
+
+- Less libraries.
+- Smaller community.
+- String, Text, ByteString, argh!
+- Namespace could be improved.
+- Lot's of compiler extensions.
+- Lazy: difficult to reason about space-complexity (althoug there are
+    good profiling tools)
+
+## Haskell is not perfect
+
+But is the best language I know.
+
+## Haskell misconceptions
+
+- Haskell is hard:
+    - The language has barely 22 constructs (the language doesn't even has exceptions).
+    - It is functional-programming what is hard.
+        - Unlike OO (dependency injection frameworks, gang-of-four patterns, concurrency)
+- Haskell is not a GP language:
+    - every domain in which Java is used Haskell can be used as well!
+- Haskell is used only in academia. That was true in the nineties.
+
 # Haskell is simple
 
 ## On the simplicity of Haskell
@@ -532,3 +655,31 @@ newtype App a = App { unApp :: ReaderT Config (StateT AppState IO) a }
 ## Hoogle
 
 Search functions by type signature.
+
+# Summary
+
+## Haskell is the right tool for learning FP
+ 
+- Less cluttered language/Less concepts
+- FP concepts are directly supported (no need to write FP-assembly)
+- Monad transformers are easy to compose
+- Discipline: you're (kind of) forced to write functional code! No way to
+  cheat with imperative code.
+- Performance does not suffer for writing functional code.
+
+## My list is incomplete
+
+I showed an incomplete list of why I like about the language, but you might
+like other aspects!
+
+## More on Scala compared to Haskell
+
+- [Rúnar Bjarnason: functional programming is terrible](https://www.youtube.com/watch?v=hzf3hTUKk8U)
+- [The Red Book On Scala has a Wiki about Haskell](https://github.com/fpinscala/fpinscala/wiki/A-brief-introduction-to-Haskell,-and-why-it-matters)
+- [On the price paid for writing Scala](https://www.reddit.com/r/haskell/comments/1pjjy5/odersky_the_trouble_with_types_strange_loop_2013/cd3bgcu/)
+
+## Where to go from here
+
+- I would like to organize FP-sessions.
+- Could be two lunches a week.
+- Learning FP in Haskell.

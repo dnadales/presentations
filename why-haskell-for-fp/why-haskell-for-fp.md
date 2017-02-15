@@ -125,6 +125,12 @@ But is the best language I know.
     - every domain in which Java is used Haskell can be used as well!
 - Haskell is used only in academia. That was true in the nineties.
 
+## Recommended video
+
+[Haskell is not for production and other tales](https://www.youtube.com/watch?v=mlTO510zO78)
+
+
+
 # Haskell is simple
 
 ## On the simplicity of Haskell
@@ -665,7 +671,6 @@ Search functions by type signature.
 - Monad transformers are easy to compose
 - Discipline: you're (kind of) forced to write functional code! No way to
   cheat with imperative code.
-- Performance does not suffer for writing functional code.
 
 ## My list is incomplete
 

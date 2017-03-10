@@ -16,7 +16,7 @@ TODO: to be asked before the meetup.
 
 - Stack is installed in your system.
 - You created and setup a `hello-haskell` project.
-
+- Optional: you downloaded and installed exercism.
 # Our first Haskell project
 
 ## Stack
@@ -73,7 +73,7 @@ hello-haskell
 
 ## Adding additional dependencies
 
-TODO: show how to add containers (required by Data.Map)
+Let's add `containers` (required by `Data.Map`)
 
 # A first taste of Haskell
 
@@ -106,7 +106,7 @@ stack ghci
   - Serve more as a documentation tool.
   - Although in occasions we need to help GHC.
   
-## Associativity
+## Associativity: function declaration
 
 - Function declaration associates right.
 ```haskell
@@ -114,18 +114,38 @@ a -> b -> c = a -> (b -> c)
 ```
 
 - Or if you prefer a mnemonic.
-Avoid -> Success -> AtAllCosts = Avoid -> (Success -> AtAllCosts)
+```haskell
+Avoid -> Success -> AtAllCosts
+```
+  should be read as
+```haskell
+Avoid -> (Success -> AtAllCosts)
+```
+
+## Associativity: function application
 
 - Function application associates left.
 ```haskell
 f x y = (f x) y
 ```
+- Or if you prefer a mnemonic.
+```haskell
+heGivesHer cat food
+```
+  should be read as
+```haskell
+(heGivesHer cat) food
+```
 
 ## Infix notation
 
-## Maybe
+Ready to use!
 
-- `fromMaybe`
+```haskell
+like a b = a ++ " like " ++ b
+like "dogs" "meat"
+"pandas" `like` "bamboo"
+```
 
 ## Lists
 
@@ -134,31 +154,121 @@ xs = [0, 1, 2]
 ys = "hello"
 oddNumbers = [ 2 * i + 1 | i <- [0..]]
 pairs = [('a', 1), ('z', 10)]
+pairs2 = [(i,j) | i <- [1,2], j <- [1..4]]
 ```
+## Operations on lists
+
+- `map`
+```haskell
+map (*2) [0..10]
+```
+
+- `filter`
+```haskell
+filter (\x -> x `mod` 2 == 0) [3, 8, 41, 1, 52]
+```
+
+- `fold`
+```haskell
+foldl (+) 0 [0..10] -- = sum [0..10]
+```
+
 ## Zip
+
+```haskell
+zip "foo" "bar"
+zip "hello" "bar"
+zip [0, 1, 2] "abc"
+zip [0 ..] "a very long string"
+```
 
 ## More functions on lists
 
 - See `Data.List`
-- Example `sum`
 
-## Map
+## Collections
 
-- `fromList`
-- `lookUp`
+Module `Data.Map` requires `collections` package.
+
+```haskell
+import qualified Data.Map.Strict as Map
+```
+
+- The `qualified` keyword means that you can access all functions in `Map` as
+  `Map.functionName`.
+  
+- Useful for preventing name clashes.
+
+## Map examples
+
+- Construct a dictionary from a list of pairs using `fromList`
+```haskell
+Map.fromList [("foo", 0), ("bar", 1)]
+```
+
+- Look up elements using `lookup` or `findWithdefault`:
+```haskell
+findWithDefault 'x' 1 (fromList [(5,'a'), (3,'b')]) == 'x'
+findWithDefault 'x' 5 (fromList [(5,'a'), (3,'b')]) == 'a'
+```
+
+## Function composition is the dot
+
+```haskell
+import Data.Char
+
+capitalize = map toUpper
+screamHello name = sayHello (capitalize name)
+screamHello1 = sayHello . capitalize
+```
 
 ## Partial application
 
 ```haskell 
 map (*2) xs
+xs = ["functional programming", "Haskell"]
+map (++ " rocks") xs
+map ("we love " ++ ) xs
 ```
 
-## Collections
+## Lambda abstractions
 
-Module `Data.Map` requires `collections` package.
 ```haskell
-import Data.Map
+filter (\x -> x == reverse x) ["foo", "bar", "ana"]
 ```
+
+## Flattening lists 
+
+```haskell
+concat :: [[a]] -> [a]
+```
+
+## Intersperse
+
+```haskell
+intersperse :: a -> [a] -> [a]
+```
+
+## Flattening and mapping
+
+- Sometimes it is useful to map a function to a list that returns a list, and
+concatenate all the elements together.
+```haskell
+>>= :: [a] -> (a -> [b]) -> [b]
+```
+- Example:
+```haskell
+[0, 1, 2, 3] >>= \i -> take i (repeat i)
+```
+
+## Flattening and mapping
+
+- Another example:
+```haskell
+[(0, "foo"), (2, "bar")] >>= \(i, str) -> zip (repeat i) str
+```
+- The type of `>>=` is more general here (I used list to avoid scaring people
+  with the *m* word).
 
 # First exercise: Scrabble score
 
@@ -166,12 +276,28 @@ import Data.Map
 
 - TODO: ask people to do this beforehand.
 
+## About dependencies
+
+Exercism uses `package.yaml` for extra dependencies, so add them there:
+
+```haskell
+name: scrabble-score
+
+dependencies:
+  - base
+
+library:
+  exposed-modules: Scrabble
+  source-dirs: src
+  dependencies:
+    containers >= 0.5
+```
+
 ## Fetch the exercise
 
 ```sh
 exercism fetch haskell scrabble-score
 ```
-
 ... and build it.
 
 ## Tip: Hoogle
@@ -185,13 +311,120 @@ Example: search for functions with type `a -> [a]`.
 exercism submit src/Scrabble.hs package.yaml
 ```
 
+## A possible solution
+
+[http://exercism.io/submissions/2df2f9affdf14a9eba8dc988b8714eff](source)
+
+```haskell
+module Scrabble (scoreLetter, scoreWord) where
+
+import           Data.Char       (toUpper)
+import           Data.Map        (Map)
+import qualified Data.Map.Strict as Map
+
+scores = Map.fromList $ [ ("AEIOULNRST", 1)
+                        , ("DG", 2)
+                        , ("BCMP", 3)
+                        , ("FHVWY", 4)
+                        , ("K", 5)
+                        , ("JX", 8)
+                        , ("QZ", 10)
+                        ] >>= (\(cs, score) -> zip cs (repeat score))
+
+scoreLetter letter = Map.findWithDefault 0 (toUpper letter) scores
+
+scoreWord = sum . map scoreLetter
+```
+
+## How do people solve this in Java?
+[http://exercism.io/submissions/ce7dc1c8ef864726b1b2483da3638258](source)
+
+```java
+import java.util.HashMap;
+
+public class Scrabble {
+
+    private String scrabbleWord;
+    private int totalScore = 0;
+    private HashMap<Character, Integer> scrabbleScore = new HashMap();
+
+    public Scrabble(String word) {
+
+        scrabbleWord = word == null ? "" : word.toUpperCase();
+
+        scrabbleScore.put('A', 1);
+        scrabbleScore.put('E', 1);
+        scrabbleScore.put('I', 1);
+        scrabbleScore.put('O', 1);
+        scrabbleScore.put('U', 1);
+        scrabbleScore.put('L', 1);
+        scrabbleScore.put('N', 1);
+        scrabbleScore.put('R', 1);
+        scrabbleScore.put('S', 1);
+        scrabbleScore.put('T', 1);
+        scrabbleScore.put('D', 2);
+        scrabbleScore.put('G', 2);
+        scrabbleScore.put('B', 3);
+        scrabbleScore.put('C', 3);
+        scrabbleScore.put('M', 3);
+        scrabbleScore.put('P', 3);
+        scrabbleScore.put('F', 4);
+        scrabbleScore.put('H', 4);
+        scrabbleScore.put('V', 4);
+        scrabbleScore.put('W', 4);
+        scrabbleScore.put('Y', 4);
+        scrabbleScore.put('K', 5);
+        scrabbleScore.put('J', 8);
+        scrabbleScore.put('X', 8);
+        scrabbleScore.put('Q', 10);
+        scrabbleScore.put('Z', 10);
+    }
+
+    public int getScore() {
+
+            for (int i = 0; i < scrabbleWord.length(); i++) {
+                if (scrabbleScore.containsKey(scrabbleWord.charAt(i))) {
+                    totalScore = totalScore + scrabbleScore.get(scrabbleWord.charAt(i));
+                }
+            }
+        return totalScore;
+    }
+}
+```
+
 # More material
 
-## Pattern matching
+## Declaring new data-types
+
+```haskell
+data Color = Red | Green | Blue
+data Maybe a = Just a | Nothing
+data List a = Cons a (List a) | Nil
+```
+
+## Pattern matching on colors
+
+```haskell
+toRGB :: Color -> (Int, Int, Int)
+toRGB Red = (255, 0, 0)
+toRGB Green = (0, 255, 0)
+toRGB Blue = (0, 0, 255)
+```
+
+## Pattern matching on Maybe
+
+```haskell
+f (Just x) = x 
+f Nothing = 0
+```
+
+## Pattern matching on lists
 
 ```haskell
 f (x:y:z:xs) = [x, z]
 f _  = []
+
+show Red = (255)
 ```
 
 `_` is a /wildcard/ pattern. Matches everything.
@@ -204,25 +437,6 @@ f  (Just x)
  | x == 1 = "One"
  | otherwise = "More"
 f Nothing = "Nothing!" 
-```
-
-## Flattening lists 
-
-```haskell
-concat :: [[a]] -> [a]
-```
-
-TODO:
-```haskell
-show and example of >>= 
-```
-
-
-
-## Intersperse
-
-```haskell
-intersperse :: a -> [a] -> [a]
 ```
 
 # Second exercise: Ocr Numbers

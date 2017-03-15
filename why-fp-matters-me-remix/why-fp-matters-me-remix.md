@@ -300,7 +300,7 @@ r = obj.f()
 - Just think about the cognitive load.
     - Harder to reason about.
     - Harder to change (impact analysis anyone?).
-
+    - Fallacy: Imperative/OO is simple (how?!)
 ## Everybody lies
 
 ```java

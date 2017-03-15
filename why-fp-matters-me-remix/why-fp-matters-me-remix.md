@@ -427,3 +427,9 @@ We want to start an FP course:
 
 - One hour per-week to get together.
 - One hour per-week to do the exercises.
+
+## But I don't have time!
+
+- 7 habits of highly effective people: sharpen the saw
+- Consider how much money you'd be saving to the company.
+    - The course is morally correct ;)

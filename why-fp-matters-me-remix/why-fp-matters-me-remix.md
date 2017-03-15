@@ -42,9 +42,9 @@ I'll try to not use cheap tricks to influence you...
 
 - Computation: evaluation of function.
 - Structure: denotational.
-  - nested expressions.
-  - each expression *denotes* something.
-  - the meaning depends on the sub-expressions.
+    - nested expressions.
+    - each expression *denotes* something.
+    - the meaning depends on the sub-expressions.
 - Avoids mutable data.
 - Avoids changing state.
 
@@ -55,7 +55,8 @@ Determine if a list is included in another.
 ```haskell
 isSublist [] ys = True
 isSublist (x:xs) [] = False
-isSublist (x:xs) (y:ys) = (y:ys) `beginsWith` (x:xs) || (x:xs) `isSublist` ys
+isSublist (x:xs) (y:ys) = 
+    (y:ys) `beginsWith` (x:xs) || (x:xs) `isSublist` ys
 
 beginsWith ys [] = True
 beginsWith [] xs = False
@@ -87,7 +88,7 @@ private static <T> boolean includes(List<T> longList, List<T> shortList) {
 
 - It is declarative: I say what to compute, not how.
 - I can reason about its correctness:
-  - Less probability of introducing errors.
+    - Less probability of introducing errors.
 - It places us at a higher level of abstraction.
 
 # On the conciseness of FP
@@ -211,17 +212,17 @@ convert = intercalate "," . map recognizeRow . chunksOf 4 . lines
 
 ## More reuse 
 
-- Functional programs promote high degrees of code re-use
-  - use of high order functions
-  - laziness: separate termination conditions from the rest of computations
+- Functional programs promote high degree of code re-use
+    - use of high order functions
+    - laziness: separate termination conditions from the rest of computations
 
 ## Why care about reuse?
 
 - Faster development cycles.
-  - In the previous example the functional code was 3 times smaller!
+    - In the previous example the functional code was 3 times smaller!
 - Less probabilities of introducing errors
-  - Since we don't have to re-invent the wheel.
-  - Re-used functions are tested more extensively.  
+    - Since we don't have to re-invent the wheel.
+    - Re-used functions are tested more extensively.  
 
 ## Elegance
 
@@ -272,29 +273,11 @@ makeFoo :: Name -> Address -> Foo
 - No runtime costs for these type aliases.
 - Now is no longer possible to swap arguments.
 
-## Everybody lies
-
-```java
-public A f<A>(A x);
-```
-
-- `f` could do anything:
-  - mutate a global variable.
-  - print on the screen.
-  - eat your lunch.
-
-## We all know what `f` is
-
-```haskell
-f :: a -> a
-```
-- We can be pretty sure `f` is the identity function.
-
 ## What other developers say about strong typing?
 
 - If it compiles in most cases it just works.
 - Catches all sort of nasty bugs:
-  - You get tests for free
+    - You get tests for free
 - Refactor without fear.
 
 # Purity
@@ -311,19 +294,38 @@ r = obj.f()
 ```
 
 - The result might depend on:
-  - the state of `obj`.
-  - the state of global variables accessed by `f`.
+    - the state of `obj`.
+    - the state of global variables accessed by `f`.
+- We cannot be sure about post-state.
 - Just think about the cognitive load.
-  - Harder to reason about.
-  - Harder to change (impact analysis anyone?).
+    - Harder to reason about.
+    - Harder to change (impact analysis anyone?).
+
+## Everybody lies
+
+```java
+public A f<A>(A x);
+```
+
+- `f` could do anything:
+    - mutate a global variable.
+    - print on the screen.
+    - eat your lunch.
+
+## We all know what `f` is
+
+```haskell
+f :: a -> a
+```
+- We can be pretty sure `f` is the identity function.
 
 ## What purity brings
 
 - Isolate side effects (IO).
 - Keep business logic pure.
 - Less cognitive load:
-  - Easier to reason about.
-  - Easier to change.
+    - Easier to reason about.
+    - Easier to change.
   
 # Composable abstractions
 
@@ -413,6 +415,7 @@ Made possible because we know we cannot touch do any IO inside `STM`.
 ## Who is using FP
 
 Almost all major players, most notably:
+
 - Google
 - Twitter
 - Facebook
@@ -421,5 +424,6 @@ Almost all major players, most notably:
 ## I want to know more!
 
 We want to start an FP course:
+
 - One hour per-week to get together.
 - One hour per-week to do the exercises.

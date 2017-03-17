@@ -12,11 +12,10 @@
 
 ## Prerequisites
 
-TODO: to be asked before the meetup.
-
 - Stack is installed in your system.
 - You created and setup a `hello-haskell` project.
 - Optional: you downloaded and installed exercism.
+
 # Our first Haskell project
 
 ## Stack
@@ -28,9 +27,6 @@ TODO: to be asked before the meetup.
 - Aims at achieving reproducible builds.
 
 ## Creating our first project
-WARNING! This needs to be done before-hand by the participants, otherwise it
-will take a lot of time to download and install the ghc!
-
 ```sh
 stack new hello-haskell
 ```
@@ -272,13 +268,9 @@ concatenate all the elements together.
 
 # First exercise: Scrabble score
 
-## Install and Setup exercism
-
-- TODO: ask people to do this beforehand.
-
 ## About dependencies
 
-Exercism uses `package.yaml` for extra dependencies, so add them there:
+`exercism.io` uses `package.yaml` for extra dependencies, so add them there:
 
 ```haskell
 name: scrabble-score
@@ -294,6 +286,8 @@ library:
 ```
 
 ## Fetch the exercise
+
+Source: http://exercism.io/exercises/haskell/scrabble-score/readme
 
 ```sh
 exercism fetch haskell scrabble-score
@@ -440,6 +434,14 @@ f Nothing = "Nothing!"
 ```
 
 # Second exercise: Ocr Numbers
+
+## Fetch it!
+
+Source: http://exercism.io/exercises/haskell/ocr-numbers/readme
+
+```sh
+exercism fetch haskell ocr-numbers
+```
 
 ## A short solution
 
@@ -673,7 +675,7 @@ final class OpticalCharacterReader {
 
 ## Java solution number 2
 
-Source: 
+Source: http://exercism.io/submissions/4768cb6be8244201bceb45653ed7f5cf
 
 ```java
 import java.util.*;

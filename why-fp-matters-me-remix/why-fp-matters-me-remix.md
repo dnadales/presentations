@@ -1,29 +1,36 @@
-% Why FP matters (me remix)
+% YA Why FP matters
 % Damian Nadales
 % March 28, 2017
 
-# Introduction
+# About
 
 ## Objective
 
 - What is FP and why should I care:
-  - as a developer
-  - as a (team) leader
-    - manager
-    - architect 
-    - product owner
+    - as a developer
+    - as a (team) leader
+        - manager
+        - architect 
+        - product owner
 
 ## So why?
 
-- If you're a developer: enjoy (y)our work.
-- If you're a manager: make more money.
+- Productivity:
+    - Less time to working code.
+- Sustainable software:
+    - Maintainable.
+    - Extensible.
+    - Performant.
+- Concurrency:
+    - Be future proof.
 
-In the remaining of the presentation I'll try to present the arguments for
-this.
+<!-- In the remaining of the presentation I'll try to present the arguments for -->
+<!-- this. -->
 
 ## Disclaimer
 
 - I'm not partial. 
+    - Although I've worked with OO/Imperative for a long time.
 - These *claimed* advantages hold for *me* (and other developers out there, but
   remain anecdotal).
 - I cannot convince you in 30 minutes, I only want to spark your curiosity.
@@ -40,11 +47,11 @@ I'll try to not use cheap tricks to influence you...
 
 ## A definition
 
-- Computation: evaluation of function.
 - Structure: denotational.
     - nested expressions.
     - each expression *denotes* something.
-    - the meaning depends on the sub-expressions.
+    - the meaning depends on (evaluating)  the sub-expressions.
+- Computation: evaluation of function.
 - Avoids mutable data.
 - Avoids changing state.
 
@@ -87,17 +94,22 @@ private static <T> boolean includes(List<T> longList, List<T> shortList) {
 ## About the functional solution
 
 - It is declarative: I say what to compute, not how.
-- I can reason about its correctness:
+- We can reason about its correctness:
     - Less probability of introducing errors.
 - It places us at a higher level of abstraction.
+    - Huge impact in productivity (no need to worry about low level details)
+    - Imagine yourself writing assembly in 2017!
 
 # On the conciseness of FP
 
 ## Another example: toy OCR
 
-Write a program to recognize digits like the following:
+- Write a program to recognize digits like the following:
 
 ```
+" _     _  _     _  _  _  _  _ ",
+"| |  | _| _||_||_ |_   ||_||_|",
+"|_|  ||_  _|  | _||_|  ||_| _|",
 " _     _  _     _  _  _  _  _ ",
 "| |  | _| _||_||_ |_   ||_||_|",
 "|_|  ||_  _|  | _||_|  ||_| _|",
@@ -222,7 +234,7 @@ convert = intercalate "," . map recognizeRow . chunksOf 4 . lines
     - In the previous example the functional code was 3 times smaller!
 - Less probabilities of introducing errors
     - Since we don't have to re-invent the wheel.
-    - Re-used functions are tested more extensively.  
+    - Re-used functions are tested more extensively.
 
 ## Elegance
 
@@ -273,6 +285,16 @@ makeFoo :: Name -> Address -> Foo
 - No runtime costs for these type aliases.
 - Now is no longer possible to swap arguments.
 
+## On the hidden cost of bad/no typing
+
+- Time to fix testing error:
+    - Average: minutes
+    - Worst case: hours.
+    - Plus time spent writing tests.
+- Time to fix compile time error:
+    - Average: seconds.
+    - Worst case: minutes.
+
 ## What other developers say about strong typing?
 
 - If it compiles in most cases it just works.
@@ -301,6 +323,7 @@ r = obj.f()
     - Harder to reason about.
     - Harder to change (impact analysis anyone?).
     - Fallacy: Imperative/OO is simple (how?!)
+
 ## Everybody lies
 
 ```java
@@ -318,6 +341,8 @@ public A f<A>(A x);
 f :: a -> a
 ```
 - We can be pretty sure `f` is the identity function.
+- Purity + types:
+    - Confidence in the code.
 
 ## What purity brings
 
@@ -326,7 +351,14 @@ f :: a -> a
 - Less cognitive load:
     - Easier to reason about.
     - Easier to change.
-  
+    
+## A practical example: big data
+
+- Google's success: map reduce.
+    - Made possible due to a functional model.
+    - No data sharing enables parallelization.
+- Apache spark exploits this functional model.
+
 # Composable abstractions
 
 ## Idea
@@ -337,39 +369,41 @@ To show you how FP allows to compose abstractions in an unprecedented way.
 
 A parser for prefixes of HTTP 1.1 requests (e.g. "HTTP/1.1\r\n")
 
-```java
-public class HttpResponseParser extends AbstractMessageParser {
+```c++
+void Response::ProcessStatusLine( std::string const& line )
+{
+    const char* p = line.c_str();
 
-    private final HttpResponseFactory responseFactory;
-    private final CharArrayBuffer lineBuf;
+    while( *p && *p == ' ' )
+        ++p;
 
-    public HttpResponseParser(
-            final SessionInputBuffer buffer,
-            final LineParser parser,
-            final HttpResponseFactory responseFactory,
-            final HttpParams params) {
-        super(buffer, parser, params);
-        if (responseFactory == null) {
-            throw new IllegalArgumentException("Response factory may not be null");
-        }
-        this.responseFactory = responseFactory;
-        this.lineBuf = new CharArrayBuffer(128);
-    }
-    
-    protected HttpMessage parseHead(
-            final SessionInputBuffer sessionBuffer)
-        throws IOException, HttpException, ParseException {
+    while( *p && *p != ' ' )
+        m_VersionString += *p++;
+    while( *p && *p == ' ' )
+        ++p;
 
-        this.lineBuf.clear();
-        int i = sessionBuffer.readLine(this.lineBuf);
-        if (i == -1) {
-            throw new NoHttpResponseException("The target server failed to respond");
-        }
-        //create the status line from the status string
-        ParserCursor cursor = new ParserCursor(0, this.lineBuf.length());
-        StatusLine statusline = lineParser.parseStatusLine(this.lineBuf, cursor);
-        return this.responseFactory.newHttpResponse(statusline, null);
-    }
+    std::string status;
+    while( *p && *p != ' ' )
+        status += *p++;
+    while( *p && *p == ' ' )
+        ++p;
+
+    while( *p )
+        m_Reason += *p++;
+
+    m_Status = atoi( status.c_str() );
+    if( m_Status < 100 || m_Status > 999 )
+        throw Wobbly( "BadStatusLine (%s)", line.c_str() );
+
+    if( m_VersionString == "HTTP:/1.0" )
+        m_Version = 10;
+    else if( 0==m_VersionString.compare( 0,7,"HTTP/1." ) )
+        m_Version = 11;
+    else
+        throw Wobbly( "UnknownProtocol (%s)", m_VersionString.c_str() );
+
+    m_State = HEADERS;
+    m_HeaderAccum.clear();
 }
 ```
 
@@ -379,6 +413,30 @@ public class HttpResponseParser extends AbstractMessageParser {
 httpResponseParser = (,) <$> (string "HTTP/" *> number <* string ".") 
                          <*> number
 ```
+
+- We are composing parsers!
+
+# Typing and purity
+
+## Multi-threading is coming 
+
+- Moore's law is now:
+    - 2x cores/2 years
+- 8 cores now
+    - 256 cores in 10 years.
+    - 8192 cores in 20 years.
+
+[See here](http://gbaz.github.io/slides/hurt-statictyping-07-2013.pdf)
+
+## The four horsemen of the parallel apocalypse
+
+- Race conditions
+- Deadlocks
+- Livelocks
+- Priority inversions
+
+## STM to the rescue
+
 ## Moving windows
 
 This is how easy it is to solve the philosophers-problem:
@@ -404,13 +462,40 @@ swapWindows disp w a v b = atomically $ do
 
 Made possible because we know we cannot touch do any IO inside `STM`.
 
+## Problem with implementing STM
+
+- Performing non-transactional side effects in a transaction.
+- Accessing transactional variables not in a transaction.
+
+## A tale of two STM
+
+- C#:
+    - Many developers.
+    - 2 years.
+    - FAILURE.
+- Haskell:
+    - Few developers (SPJ & a student)
+    - "a long weekend"
+    - SUCCESS.
+- Why? Static typing and purity.
+
+## Being future proof
+
+- Multi-threading is coming.
+- Use functional programming to tame it.
 
 # Conclusions
 
 ## FP in three bullets
-- More productive developers.
-- Reduce development costs.
-- Reduce maintenance costs.
+
+- Productivity:
+    - Less time to working code.
+- Sustainable software:
+    - Maintainable.
+    - Extensible.
+    - Performant.
+- Concurrency:
+    - Be future proof.
 
 ## Who is using FP
 

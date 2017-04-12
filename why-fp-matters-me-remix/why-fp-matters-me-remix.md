@@ -35,14 +35,6 @@
   remain anecdotal).
 - I cannot convince you in 30 minutes, I only want to spark your curiosity.
 
-## Disclaimer
-
-I'll try to not use cheap tricks to influence you...
-
-## Disclaimer
-
-... but management does not want you to hear this.
-
 # What is FP
 
 ## A definition
@@ -53,7 +45,7 @@ I'll try to not use cheap tricks to influence you...
     - the meaning depends on (evaluating)  the sub-expressions.
 - Computation: evaluation of function.
 - Avoids mutable data.
-- Avoids changing state.
+- Side effects (IO) pushed to the boundaries.
 
 ## Let's see an example
 Determine if a list is included in another.
@@ -93,6 +85,7 @@ private static <T> boolean includes(List<T> longList, List<T> shortList) {
 
 ## About the functional solution
 
+- Program the way you think vs program the way the machine thinks.
 - It is declarative: I say what to compute, not how.
 - We can reason about its correctness:
     - Less probability of introducing errors.

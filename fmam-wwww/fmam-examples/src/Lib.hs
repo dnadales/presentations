@@ -15,7 +15,7 @@ someFunc = putStrLn "someFunc"
 
 -- ** Let's start with the billion dollar mistake.
 
-data Address = Address { address :: String }
+newtype Address = Address { address :: String }
 
 type AddressBook = Map Int Address
 
@@ -140,3 +140,34 @@ lengthF = (length <$>)
 -- The key is: getting rid of the accidental complexity through higher order.
 
 -- * Applicatives
+
+newtype Name = Name { name :: String }
+
+data Employee = Employee Name Address
+
+type NameDir = Map Int Name
+
+getName = Map.lookup
+
+getEmployee :: Int -> NameDir -> AddressBook -> Maybe Employee
+getEmployee i nDir aBook =
+  case getName i nDir of
+    Nothing -> Nothing
+    Just name ->
+      case getAddress i aBook of
+        Nothing      -> Nothing
+        Just address -> Just (Employee name address)
+
+-- Imagine that we'll have to add a third field to employee...
+--
+-- Twister!
+
+-- If you look at the code above, we're extracting the values inside the
+-- Maybe's (if any), and applying the @Employee@ constructor.
+
+-- ** Two functions to fight the twister:
+-- pure  :: a -> f a
+-- (<*>) :: f (a -> b) -> f a -> f b
+
+getEmployee i nDir aBook =
+  pure Employee <*> getName i nDir <*> getAddress i aBook

@@ -9,3 +9,16 @@
 ```java
 public Foo getFoo(i: Int) {...}
 ```
+
+# Applicatives
+
+## Parsing
+
+TODO: show a parser in the slides.
+
+```haskell
+newtype Parser s a = P { runP :: s -> Maybe (a, s) }
+```
+
+From:
+/Users/damian.nadales/Documents/github/capitanbatata/functional-systems-in-haskell/fsh-exercises/src/Parsing.hs

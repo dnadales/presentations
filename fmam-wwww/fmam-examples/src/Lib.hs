@@ -162,12 +162,23 @@ getEmployee i nDir aBook =
 --
 -- Twister!
 
+-- What if we want to read an employee from the console
+readEmployee :: IO Employee
+readEmployee = do
+  name <- getLine
+  address <- getLine
+  return (Employee (Name name) (Address address))
+
 -- If you look at the code above, we're extracting the values inside the
--- Maybe's (if any), and applying the @Employee@ constructor.
+-- Maybe's (if any) and IO's, and applying the @Employee@ constructor.
 
 -- ** Two functions to fight the twister:
 -- pure  :: a -> f a
 -- (<*>) :: f (a -> b) -> f a -> f b
 
-getEmployee i nDir aBook =
+getEmployee' i nDir aBook =
   pure Employee <*> getName i nDir <*> getAddress i aBook
+
+readEmployee' =
+  pure Employee <*> (Name <$> getLine) <*> (Address <$> getLine)
+

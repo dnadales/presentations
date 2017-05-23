@@ -5,52 +5,138 @@ import           Control.Concurrent.Async
 import           Data.ByteString.Lazy     (ByteString)
 import qualified Data.ByteString.Lazy     as L
 import           Data.Char
-import           Network.HTTP.Conduit
+import           Data.Map.Strict          (Map)
+import qualified Data.Map.Strict          as Map
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
--- * Let's start with the billion dollar mistake.
+-- * Functors
 
-data Foo = Foo { fooName :: String }
+-- ** Let's start with the billion dollar mistake.
 
--- | Get a Foo.
-getFoo :: Int -> Maybe Foo
-getFoo = undefined
+data Address = Address { address :: String }
 
--- | Capitalize a @String@.
-capitalize :: String -> String
-capitalize = map toUpper
+type AddressBook = Map Int Address
 
--- | Capitalize a @Foo@.
-capitalizeFoo :: Foo -> Foo
-capitalizeFoo (Foo name) = Foo (capitalize name)
+-- | Some hard-coded addresses:
+addressBook = Map.fromList [ (0, Address "Foo addr. 0")
+                           , (1, Address "Bar addr. 1")]
 
--- | Get a Foo and convert its name to upper case.
-screamFooName :: Int -> Maybe Foo
-screamFooName i =
-  case getFoo i of
-    Just foo -> Just (capitalizeFoo foo)
-    Nothing  -> Nothing
+-- > getAddress :: Int -> AddressBook -> Address -- WRONG
 
--- | @screamFooName@ using @fmap@.
-screamFooName' i = capitalizeFoo <$> getFoo i
+-- | Get a Address.
+getAddress :: Int -> AddressBook -> Maybe Address
+getAddress = Map.lookup
 
--- * Let's cause side effects.
-upperFile :: String -> IO String
-upperFile path = do
+-- | Get a the digits inside an address.
+getAddressDigits :: Int -> AddressBook -> Maybe String
+getAddressDigits i aBook =
+  case getAddress i aBook of
+    Nothing             -> Nothing
+    Just (Address name) -> Just (filter isDigit name)
+
+lengthAddress :: Int -> AddressBook -> Maybe Int
+lengthAddress i aBook =
+  case getAddress i aBook of
+    Just (Address name) -> Just (length name)
+    Nothing             -> Nothing
+
+-- It seems like we have some code duplication...
+mapAddressBook :: (String -> b) -> Int -> AddressBook -> Maybe b
+mapAddressBook f i aBook =
+  case getAddress i aBook of
+    Just (Address name) -> Just (f name)
+    Nothing             -> Nothing
+
+getAddressDigits' :: Int -> AddressBook -> Maybe String
+getAddressDigits' i aBook = mapAddressBook (filter isDigit) i aBook
+
+lengthAddress' :: Int -> AddressBook -> Maybe Int
+lengthAddress' = mapAddressBook length
+
+-- ** Let's more abstract!
+--
+--  If you think about it, @mapAddressBook@ is implementing a function that is
+--  more related to the @Maybe@ type.
+
+mapMaybe :: (a -> b) -> Maybe a -> Maybe b
+mapMaybe f (Just x) = Just (f x)
+mapMaybe _ Nothing  = Nothing
+
+mapAddressBook' :: (String -> b) -> Int -> AddressBook -> Maybe b
+mapAddressBook' f i aBook =
+  (f . address) `mapMaybe` (getAddress i aBook)
+
+getAddressDigits'' :: Int -> AddressBook -> Maybe String
+getAddressDigits'' = mapAddressBook' (filter isDigit)
+
+lengthAddress'' :: Int -> AddressBook -> Maybe Int
+lengthAddress'' = mapAddressBook length
+
+-- So we got an (amortized) 3 times code size reduction.
+
+-- ** Let's cause side effects.
+
+-- | Extract the digits in a file.
+digitsInFile :: String -> IO String
+digitsInFile path = do
   contents <- readFile path
-  return (capitalize contents)
+  return (filter isDigit contents)
+
+lengthFile :: String -> IO Int
+lengthFile path = do
+  contents <- readFile path
+  return (length contents)
+
+mapIO :: (a -> b) -> IO a -> IO b
+mapIO f ioa = do
+  x <- ioa
+  return (f x)
 
 -- | @upperFile@ using @fmap@
-upperFile' path = capitalize <$> readFile path
+digitsInFile' path = (filter isDigit) `mapIO` readFile path
+lengthFile' path = length `mapIO` readFile path
 
--- * The good old lists.
-inc :: Num a => [a] -> [a]
-inc []     = []
-inc (n:ns) = (n+1):(inc ns)
+-- ** The good old lists.
+-- | Get the digits in a list of strings.
+digitsInList :: [String] -> [String]
+digitsInList []       = []
+digitsInList (ns:nss) = (filter isDigit ns):(digitsInList nss)
 
-inc' :: Num a => [a] -> [a]
--- WARNING: the type of `inc'` is more generic as it can operate over any
--- functor.
-inc' = ((+1) <$>)
+lengthStrings :: [String] -> [Int]
+lengthStrings []       = []
+lengthStrings (ns:nss) = (length ns):(lengthStrings nss)
+
+-- But we have:
+--
+-- > map :: (a -> b) -> [a] -> [b]
+
+digitsInList' = map (filter isDigit)
+
+lengthStrings' :: [String] -> [Int]
+-- WARNING: the type of this function is more generic as it can operate over
+-- any foldable.
+lengthStrings' = map length
+
+-- ** Using @fmap@'s
+
+-- But let's look at all the signatures we've been using:
+--
+-- > mapMaybe :: (a -> b) -> Maybe a -> Maybe b
+-- > mapIO    :: (a -> b) -> IO    a -> IO    b
+-- > map      :: (a -> b) -> []    a -> []    b
+
+-- We could use @fmap@ from functors! Then we don't need @mapMaybe@, @mapIO@, and @map@!
+
+-- Furthermore, we can get rid of the @digitsInFile@, @digitsInIO@,
+-- @lengthFile@ and @lengthStrings@!
+digitsInF :: Functor f => f String -> f String
+digitsInF = ((filter isDigit) <$>)
+
+lengthF :: Functor f => f [a] -> f Int
+lengthF = (length <$>)
+
+-- The key is: getting rid of the accidental complexity through higher order.
+
+-- * Applicatives

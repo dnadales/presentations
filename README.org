@@ -4,13 +4,18 @@
 
 *** Generating the slides
     The Markdown files in this repository can be used to generate [[https://github.com/hakimel/reveal.js/][reveal.js]]
-    slides, using [[pandoc.org][pandoc]]. To avoid the hassle of having to install reveal.js, a
+    slides, using [[http://pandoc.org][pandoc]]. To avoid the hassle of having to install reveal.js, a
     docker container is provided at [[https://github.com/capitanbatata/revealjs-server][this git repository]]. 
 
     To generate the slides out of a Markdown file use:
     #+BEGIN_SRC sh
-    pandoc -t revealjs -s --variable="revealjs-url":"" file.md -o index.html
+      pandoc -t revealjs -s --variable="revealjs-url":"" file.md -o index.html
     #+END_SRC
+    The following example sets additional variables:
+    #+BEGIN_SRC haskell
+      pandoc -t revealjs -s --variable="revealjs-url":"" getting-started-with-haskell.md -V theme=solarized -V history=true -o index.html
+    #+END_SRC
+
 
     Then, assuming the slides are at the current working directory start the
     docker container with:

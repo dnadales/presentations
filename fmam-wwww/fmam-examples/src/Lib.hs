@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Lib where
 
+import           Control.Applicative
 import           Control.Concurrent.Async
 import           Data.ByteString.Lazy     (ByteString)
 import qualified Data.ByteString.Lazy     as L
@@ -182,3 +183,79 @@ getEmployee' i nDir aBook =
 readEmployee' =
   pure Employee <*> (Name <$> getLine) <*> (Address <$> getLine)
 
+-- * Monads
+
+-- Imagine we'd have to lookup the employee's id by her social security number:
+type SSNDir = Map Int Int
+
+getId = Map.lookup
+
+getEmployeeBySSD :: Int -> SSNDir -> NameDir -> AddressBook -> Maybe Employee
+getEmployeeBySSD ssn sDir nDir aBook =
+  -- We'd like to use:
+--
+-- > pure Employee <*> getName i nDir <*> getAddress i aBook
+--
+-- But @i@ has to come from the lookup operation @getId@, which can return nothing!
+--
+-- We can't simply complete the code above by adding:
+--
+-- > where i = getId ssn
+  case getId ssn sDir of
+    Nothing -> Nothing
+    Just i  -> pure Employee <*> getName i nDir <*> getAddress i aBook
+
+-- Good, but it seems there is some boilerplate left.
+
+-- If we'd had some function:
+flatMapMaybe :: Maybe a -> (a -> Maybe b) -> Maybe b
+flatMapMaybe ma fmb =
+  case ma of
+    Nothing -> Nothing
+    Just x  -> fmb x
+
+-- Then we could re-write:
+getEmployeeBySSD' ssn sDir nDir aBook =
+  getId ssn sDir `flatMapMaybe`
+  \i -> pure Employee <*> getName i nDir <*> getAddress i aBook
+
+-- ** Permutations of a list
+
+-- Write a function that returns all the permutations of a list:
+
+-- We'll use an auxiliary function:
+--
+interleave :: a -> [a] -> [[a]]
+interleave x []     = [[x]]
+interleave x (y:ys) = [x:y:ys] ++ map (y:) (interleave x ys)
+
+perms :: [a] -> [[a]]
+perms []     = [[]]
+perms (x:xs) =
+  -- This won't compile
+  --
+  -- > map (interleave x) (perms xs)
+  --
+  flatMapList (perms xs) (interleave x)
+
+flatMapList :: [a] -> (a -> [b]) -> [b]
+flatMapList xs f = concat (map f xs)
+
+-- * Alternative
+
+-- What if we didn't know where data come from?
+findEmployee :: Int -> Map Int Employee -> Map Int Employee -> Maybe Employee
+findEmployee i dir0 dir1 =
+  case Map.lookup i dir0 of
+    Nothing -> Map.lookup i dir1
+    je      -> je
+
+-- What if we had function:
+altMaybe :: Maybe a -> Maybe a -> Maybe a
+altMaybe ma mb =
+  case ma of
+    Nothing -> mb
+    ja      -> ja
+
+findEmployee' i dir0 dir1 =
+  Map.lookup i dir0 `altMaybe` Map.lookup i dir1

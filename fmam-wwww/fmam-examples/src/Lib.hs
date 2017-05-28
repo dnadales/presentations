@@ -8,6 +8,8 @@ import qualified Data.ByteString.Lazy     as L
 import           Data.Char
 import           Data.Map.Strict          (Map)
 import qualified Data.Map.Strict          as Map
+import           GHC.IO
+import           System.IO
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
@@ -51,12 +53,12 @@ mapAddressBook f i aBook =
     Nothing             -> Nothing
 
 getAddressDigits' :: Int -> AddressBook -> Maybe String
-getAddressDigits' i aBook = mapAddressBook (filter isDigit) i aBook
+getAddressDigits' = mapAddressBook (filter isDigit)
 
 lengthAddress' :: Int -> AddressBook -> Maybe Int
 lengthAddress' = mapAddressBook length
 
--- ** Let's more abstract!
+-- ** Let's get more abstract!
 --
 --  If you think about it, @mapAddressBook@ is implementing a function that is
 --  more related to the @Maybe@ type.
@@ -259,3 +261,18 @@ altMaybe ma mb =
 
 findEmployee' i dir0 dir1 =
   Map.lookup i dir0 `altMaybe` Map.lookup i dir1
+
+-- What if we didn't know which file to open?
+openAnyOfThese :: FilePath -> FilePath -> IO Handle
+openAnyOfThese f0 f1 =
+   openFile f0 ReadMode `catchIOError` \ _ -> openFile f1 ReadMode
+    where catchIOError :: IO a -> (IOError -> IO a) -> IO a
+          catchIOError = catchException
+
+-- What if we had a function:
+altIO :: IO a -> IO a -> IO a
+altIO io0 io1 = io0 `catchIOError` \ _ -> io1
+    where catchIOError :: IO a -> (IOError -> IO a) -> IO a
+          catchIOError = catchException
+
+openAnyOfThese' f0 f1 = openFile f0 ReadMode `altIO` openFile f1 ReadMode

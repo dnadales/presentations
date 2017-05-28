@@ -42,8 +42,8 @@ getAddressDigits i aBook =
 lengthAddress :: Int -> AddressBook -> Maybe Int
 lengthAddress i aBook =
   case getAddress i aBook of
-    Just (Address name) -> Just (length name)
     Nothing             -> Nothing
+    Just (Address name) -> Just (length name)
 
 -- It seems like we have some code duplication...
 mapAddressBook :: (String -> b) -> Int -> AddressBook -> Maybe b
@@ -243,6 +243,46 @@ perms (x:xs) =
 flatMapList :: [a] -> (a -> [b]) -> [b]
 flatMapList xs f = concat (map f xs)
 
+-- Re-writing our monadic examples
+getEmployeeBySSD'' ssn sDir nDir aBook =
+  getId ssn sDir >>=
+  \i -> pure Employee <*> getName i nDir <*> getAddress i aBook
+
+perms' []     = [[]]
+perms' (x:xs) = perms xs >>= interleave x
+
+-- ** Do notation
+tripleGetLine :: IO (String, String, String)
+tripleGetLine =
+  getLine >>= \l0 ->
+  getLine >>= \l1 ->
+  getLine >>= \l2 ->
+  return (l0, l1, l2)
+
+tripleGetLine' = do
+  l0 <- getLine
+  l1 <- getLine
+  l2 <- getLine
+  return (l0, l1, l2)
+
+-- Re-writing our examples with do notation:
+getEmployeeBySSD''' ssn sDir nDir aBook = do
+  i <- getId ssn sDir
+  pure Employee <*> getName i nDir <*> getAddress i aBook
+
+-- Or even...
+
+getEmployeeBySSD'''' ssn sDir nDir aBook = do
+  i <- getId ssn sDir
+  name <- getName i nDir
+  addr <- getAddress i aBook
+  return (Employee name addr)
+
+perms'' []     = [[]]
+perms'' (x:xs) = do
+  ys <- perms xs
+  return (interleave x ys)
+
 -- * Alternative
 
 -- What if we didn't know where data come from?
@@ -276,3 +316,8 @@ altIO io0 io1 = io0 `catchIOError` \ _ -> io1
           catchIOError = catchException
 
 openAnyOfThese' f0 f1 = openFile f0 ReadMode `altIO` openFile f1 ReadMode
+
+-- Using our alternatives...
+findEmployee'' i dir0 dir1 = Map.lookup i dir0 <|> Map.lookup i dir1
+
+openAnyOfThese'' f0 f1 = openFile f0 ReadMode <|> openFile f1 ReadMode

@@ -24,22 +24,18 @@ height: 400
 ## This story begins with the billion dollar mistake
 
 ```java
-public Address getAddress(i: Int) {...}
+public Address getAddress(Int i, AddressBook aBook) {...}
 ```
 
 ## Solving the billion dollar mistake
 
 ```haskell
-getAddress :: Int -> AddressBook -> Maybe Address
-getAddress = Map.lookup
-```
-
-## Addresses
-
-```haskell
 newtype Address = Address { address :: String }
 
 type AddressBook = Map Int Address
+
+getAddress :: Int -> AddressBook -> Maybe Address
+getAddress = Map.lookup
 
 -- | Some hard-coded addresses:
 addressBook = Map.fromList [ (0, Address "Foo addr. 0")
@@ -72,8 +68,8 @@ lengthAddress i aBook =
 mapAddressBook :: (String -> b) -> Int -> AddressBook -> Maybe b
 mapAddressBook f i aBook =
   case getAddress i aBook of
-    Just (Address name) -> Just (f name)
     Nothing             -> Nothing
+    Just (Address name) -> Just (f name)
 
 getAddressDigits' :: Int -> AddressBook -> Maybe String
 getAddressDigits' i aBook = mapAddressBook (filter isDigit) i aBook
@@ -88,8 +84,8 @@ lengthAddress' = mapAddressBook length
 
 ```haskell
 mapMaybe :: (a -> b) -> Maybe a -> Maybe b
-mapMaybe f (Just x) = Just (f x)
 mapMaybe _ Nothing  = Nothing
+mapMaybe f (Just x) = Just (f x)
 
 mapAddressBook' :: (String -> b) -> Int -> AddressBook -> Maybe b
 mapAddressBook' f i aBook =
@@ -247,6 +243,8 @@ getEmployee' i nDir aBook =
   Employee `fmap2` (getName i nDir) (getAddress i aBook)
 ```
 
+. . .
+
 - But what if we add other fields to employee?
 - We could define `fmap3`, `fmap4`, `fmap5`, etc.
 - But we like type signatures that fit in 80 characters.
@@ -274,6 +272,8 @@ getEmployee' i nDir aBook =
   (Employee <$> getName i nDir) `applyMaybe` getAddress i aBook
 ```
 
+. . .
+
 All great but ...
 
 . . .
@@ -290,7 +290,7 @@ apply      :: f     (a -> b) -> f     a -> f     b
 ```haskell
 class Functor f => Applicative f where
   pure :: a -> f a -- Lift a value
-  (<*>):: f (a -> b) -> f a -> a b -- Sequential application
+  (<*>):: f (a -> b) -> f a -> f b -- Sequential application
 ```
 
 ```haskell
@@ -323,6 +323,8 @@ getEmployeeBySSD ssn sDir nDir aBook =
   pure Employee <*> getName i nDir <*> getAddress i aBook
   where i = getId ssn
 ```
+
+. . .
 
 But `i` has to come from the lookup operation `getId`, which can return
 nothing!
@@ -454,9 +456,7 @@ tripleGetLine' = do
 getEmployeeBySSD''' ssn sDir nDir aBook = do
   i <- getId ssn sDir
   pure Employee <*> getName i nDir <*> getAddress i aBook
-
 -- Or even...
-
 getEmployeeBySSD'''' ssn sDir nDir aBook = do
   i <- getId ssn sDir
   name <- getName i nDir
@@ -543,6 +543,7 @@ findEmployee'' i dir0 dir1 = Map.lookup i dir0 <|> Map.lookup i dir1
 openAnyOfThese'' f0 f1 = openFile f0 ReadMode <|> openFile f1 ReadMode
 ```
 
+
 # Parsing
 
 ## A simple parser 
@@ -554,7 +555,22 @@ newtype Parser s a = P { runP :: s -> Maybe (a, s) }
 
 # Epilogue 
 
+## Laws
+
+- Functors, applicatives, monads, and alternatives instances must obey laws:
+    - Help reasoning about programs and building intuition.
+    - Guide the implementation of these instances.
+- Due to time constraints I didn't discuss them here.
+
 ## Conclusions
+
+- Functors, applicatives, monads, and alternatives allows high degree of code
+  reuse.
+      - Smaller code-bases.
+      - Less probability of introducing errors.
+- It might take time to learn them but it pays off.
+- There is more: foldables, traversables, co-monads, categories, etc.
+
 
 ## Further reading
 

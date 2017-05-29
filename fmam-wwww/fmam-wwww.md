@@ -16,7 +16,7 @@ height: 400
 
 - Don't expect to understand monads after this presentation.
     - Knowledge is not acquired linearly
-    - These are very generic abstractions
+    - These are very general abstractions
 - I'm doing my best, but you should learn this from the best.
 
 # Functors
@@ -574,6 +574,8 @@ newtype Parser s a = P { runP :: s -> Maybe (a, s) }
 
 ## Further reading
 
-- [The monad tutorial fallacy](https://byorgey.wordpress.com/2009/01/12/abstraction-intuition-and-the-monad-tutorial-fallacy/)
+-
+  [The monad tutorial fallacy](https://byorgey.wordpress.com/2009/01/12/abstraction-intuition-and-the-monad-tutorial-fallacy/)
+- [Functors, Applicatives, And Monads In Pictures](http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)
 - [Dr Frankenfunctor and the Monadster (F#)](https://fsharpforfunandprofit.com/posts/monadster/)
 - [The typeclassopedia](https://wiki.haskell.org/Typeclassopedia)

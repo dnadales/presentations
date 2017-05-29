@@ -546,6 +546,52 @@ openAnyOfThese'' f0 f1 = openFile f0 ReadMode <|> openFile f1 ReadMode
 
 # Parsing
 
+## Parsing HTTP responses
+
+```java
+public class HttpResponseParser extends AbstractMessageParser {
+
+    private final HttpResponseFactory responseFactory;
+    private final CharArrayBuffer lineBuf;
+
+    public HttpResponseParser(
+            final SessionInputBuffer buffer,
+            final LineParser parser,
+            final HttpResponseFactory responseFactory,
+            final HttpParams params) {
+        super(buffer, parser, params);
+        if (responseFactory == null) {
+            throw new IllegalArgumentException("Response factory may not be null");
+        }
+        this.responseFactory = responseFactory;
+        this.lineBuf = new CharArrayBuffer(128);
+    }
+    
+    protected HttpMessage parseHead(
+            final SessionInputBuffer sessionBuffer)
+        throws IOException, HttpException, ParseException {
+
+        this.lineBuf.clear();
+        int i = sessionBuffer.readLine(this.lineBuf);
+        if (i == -1) {
+            throw new NoHttpResponseException("The target server failed to respond");
+        }
+        //create the status line from the status string
+        ParserCursor cursor = new ParserCursor(0, this.lineBuf.length());
+        StatusLine statusline = lineParser.parseStatusLine(this.lineBuf, cursor);
+        return this.responseFactory.newHttpResponse(statusline, null);
+    }
+}
+```
+
+## FP style
+
+```haskell
+httpResponseParser = (,) <$> (string "HTTP/" *> number <* string ".") 
+                         <*> number
+```
+
+
 ## A simple parser 
 TODO: Maybe $ show a parser in the slides.
 

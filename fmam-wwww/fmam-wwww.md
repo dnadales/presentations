@@ -591,14 +591,6 @@ httpResponseParser = (,) <$> (string "HTTP/" *> number <* string ".")
                          <*> number
 ```
 
-
-## A simple parser 
-TODO: Maybe $ show a parser in the slides.
-
-```haskell
-newtype Parser s a = P { runP :: s -> Maybe (a, s) }
-```
-
 # Epilogue 
 
 ## Laws

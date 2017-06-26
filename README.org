@@ -9,13 +9,19 @@
 
     To generate the slides out of a Markdown file use:
     #+BEGIN_SRC sh
-      pandoc -t revealjs -s --variable="revealjs-url":"" file.md -o index.html
+      pandoc -t revealjs -s --variable="revealjs-url":"" presentation.md -o index.html
     #+END_SRC
     The following example sets additional variables:
-    #+BEGIN_SRC haskell
-      pandoc -t revealjs -s --variable="revealjs-url":"" getting-started-with-haskell.md -V theme=solarized -V history=true -o index.html
+    #+BEGIN_SRC sh
+      pandoc -t revealjs -s --variable="revealjs-url":"" presentation.md -V theme=solarized -V history=true -o index.html
     #+END_SRC
 
+    A custom template can be added by specifying the css option:
+    #+BEGIN_SRC sh
+       pandoc -t revealjs -s --variable="revealjs-url":"" presentation.md  -V theme=white-mod  --css=white-mod.css -o index.html
+    #+END_SRC
+    I'm currently looking for a way to avoid copying the custom css. I'll
+    probably modify the docker container that serves the presentation.
 
     Then, assuming the slides are at the current working directory start the
     docker container with:

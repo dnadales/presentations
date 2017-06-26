@@ -51,3 +51,10 @@ stack exec linksio-exe
 
 - Browse to `localhost:8080/users`. 
 - Nice, now let's add some functionality.
+
+# Adding the first functionality
+
+## Anatomy of a Servant (web) server
+
+- `src/LinksAPI.hs`: types of the API.
+- `src/LinksData.hs`: data we use in our server.

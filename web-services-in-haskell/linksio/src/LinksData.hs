@@ -6,12 +6,13 @@ module LinksData
   , UserId
   , LinkId
   , Vote
-  , LinkSortCriterion
+  , LinksSortCriterion
   , LinkDetails
   ) where
 
 import           Data.Aeson
 import           Data.Aeson.TH
+import           Data.Time.Clock
 
 data Link = Link
   { linkDesc :: String
@@ -34,17 +35,20 @@ $(deriveJSON defaultOptions ''LinkId)
 
 data Vote = Vote
   { linkId     :: LinkId
-  , voteUserId :: Integer
+  , voteUserId :: UserId
+  , voteUp     :: Bool -- ^ True for a vote up. False for a vote down.
   } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''Vote)
 
-data LinkSortCriterion = DateAsc | DateDesc | RatingAsc | RatingDesc
+data LinksSortCriterion = DateAsc | DateDesc | RatingAsc | RatingDesc
   deriving (Eq, Show)
-$(deriveJSON defaultOptions ''LinkSortCriterion)
+$(deriveJSON defaultOptions ''LinksSortCriterion)
 
 data LinkDetails = LinkDetails
-  { addedBy :: UserId
-  , link    :: Link
+  { addedBy     :: UserId
+  , link        :: Link
+  , linkVotes   :: Integer
+  , linkAddedOn :: UTCTime
   } deriving (Eq, Show)
 $(deriveJSON defaultOptions ''LinkDetails)
 

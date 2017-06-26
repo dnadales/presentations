@@ -5,10 +5,10 @@
 
 module LinksAPI (API) where
 
-import Servant
-import LinksData
+import           LinksData
+import           Servant
 
-type API = AddLinkEP
+type API = AddLinkEP :<|> VoteLinkEP :<|> GetLinksEP
 
 -- | Add a link to the bookmarks.
 type AddLinkEP = LinksP
@@ -16,11 +16,13 @@ type AddLinkEP = LinksP
               :> PostCreated '[JSON] LinkId
 
 -- | Vote a link up.
-type VoteLinkEP = LinksP :> ReqBody '[JSON] Vote :> Post '[JSON] NoContent
+type VoteLinkEP = LinksP
+               :> ReqBody '[JSON] Vote
+               :> Post '[JSON] NoContent
 
 -- | Get links.
 type GetLinksEP = LinksP
-               :> QueryParam "sortBy" LinkSortCriterion
+               :> QueryParam "sortBy" LinksSortCriterion
                :> QueryParam "first" Integer
                :> QueryParam "howMany" Integer
                :> Get '[JSON] [LinkDetails]

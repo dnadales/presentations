@@ -23,6 +23,7 @@ library
                      , servant-server
                      , wai
                      , warp
+                     , time
   default-language:    Haskell2010
 
 executable linksio-exe

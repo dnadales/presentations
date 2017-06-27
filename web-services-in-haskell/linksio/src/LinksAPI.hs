@@ -5,10 +5,11 @@
 
 module LinksAPI (API, ServiceAPI) where
 
+import           Data.Swagger
 import           LinksData
 import           Servant
 
-type API = ServiceAPI
+type API = ServiceAPI :<|> SwaggerAPI
 
 type ServiceAPI = AddLinkEP :<|> VoteLinkEP :<|> GetLinksEP
 
@@ -19,6 +20,7 @@ type AddLinkEP = LinksP
 
 -- | Vote a link up.
 type VoteLinkEP = LinksP
+               :> "vote"
                :> ReqBody '[JSON] Vote
                :> Post '[JSON] NoContent
 
@@ -30,3 +32,7 @@ type GetLinksEP = LinksP
                :> Get '[JSON] [LinkDetails]
 
 type LinksP = "links"
+
+-- * Swagger API's
+
+type SwaggerAPI = "swagger.json" :> Get '[JSON] Swagger

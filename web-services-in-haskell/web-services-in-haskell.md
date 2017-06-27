@@ -98,3 +98,20 @@ getLinks :: Maybe LinksSortCriterion
          -> LinksHandler [LinkDetails]
 getLinks = undefined
 ```
+
+## Generating documentation
+
+```haskell
+app :: Application
+app = simpleCors $ serve api (linksServer mkServerEnv :<|> return swaggerDocs)
+
+swaggerDocs :: Swagger
+swaggerDocs = toSwagger serviceAPI
+  where serviceAPI :: Proxy ServiceAPI
+        serviceAPI = Proxy
+```
+
+```sh
+docker pull swaggerapi/swagger-ui
+docker run -p 80:8080 -d --rm swaggerapi/swagger-ui
+```

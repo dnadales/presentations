@@ -54,7 +54,47 @@ stack exec linksio-exe
 
 # Adding the first functionality
 
-## Anatomy of a Servant (web) server
+## Anatomy of this Servant (web) server
 
 - `src/LinksAPI.hs`: types of the API.
 - `src/LinksData.hs`: data we use in our server.
+- `src/LinksServer.hs`: implementation of the API server.
+- `src/LinksApp.hs`: definition of the application that can be run.
+
+## Defining an end-point
+
+```haskell
+type GetLinksEP = LinksP
+               :> QueryParam "sortBy" LinksSortCriterion
+               :> QueryParam "first" Integer
+               :> QueryParam "howMany" Integer
+               :> Get '[JSON] [LinkDetails]
+
+type LinksP = "links"
+```
+
+## Defining the data
+
+```haskell
+data LinksSortCriterion = DateAsc | DateDesc | RatingAsc | RatingDesc
+  deriving (Eq, Show)
+$(deriveJSON defaultOptions ''LinksSortCriterion)
+
+data LinkDetails = LinkDetails
+  { addedBy     :: UserId
+  , link        :: Link
+  , linkVotes   :: Integer
+  , linkAddedOn :: UTCTime
+  } deriving (Eq, Show)
+$(deriveJSON defaultOptions ''LinkDetails)
+```
+
+## Implementing the end-points
+
+```haskell
+getLinks :: Maybe LinksSortCriterion
+         -> Maybe Integer
+         -> Maybe Integer
+         -> LinksHandler [LinkDetails]
+getLinks = undefined
+```

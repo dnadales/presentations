@@ -13,6 +13,7 @@ module LinksData
 import           Data.Aeson
 import           Data.Aeson.TH
 import           Data.Time.Clock
+import           Web.HttpApiData
 
 data Link = Link
   { linkDesc :: String
@@ -41,8 +42,11 @@ data Vote = Vote
 $(deriveJSON defaultOptions ''Vote)
 
 data LinksSortCriterion = DateAsc | DateDesc | RatingAsc | RatingDesc
-  deriving (Eq, Show)
+  deriving (Eq, Show, Bounded, Enum)
 $(deriveJSON defaultOptions ''LinksSortCriterion)
+
+instance FromHttpApiData LinksSortCriterion where
+  parseUrlPiece = parseBoundedTextData
 
 data LinkDetails = LinkDetails
   { addedBy     :: UserId

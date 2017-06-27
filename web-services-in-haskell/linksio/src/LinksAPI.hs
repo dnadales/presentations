@@ -3,12 +3,14 @@
 {-# LANGUAGE TypeOperators   #-}
 -- | API definition.
 
-module LinksAPI (API) where
+module LinksAPI (API, ServiceAPI) where
 
 import           LinksData
 import           Servant
 
-type API = AddLinkEP :<|> VoteLinkEP :<|> GetLinksEP
+type API = ServiceAPI
+
+type ServiceAPI = AddLinkEP :<|> VoteLinkEP :<|> GetLinksEP
 
 -- | Add a link to the bookmarks.
 type AddLinkEP = LinksP

@@ -18,12 +18,17 @@ library
   exposed-modules:     Lib
                      , LinksAPI
                      , LinksData
+                     , LinksServer
+                     , LinksApp
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , servant-server
                      , wai
                      , warp
                      , time
+                     , mtl
+                     , transformers
+                     , http-api-data
   default-language:    Haskell2010
 
 executable linksio-exe

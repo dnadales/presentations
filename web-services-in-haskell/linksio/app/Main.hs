@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import           LinksApp
 
 main :: IO ()
 main = startApp

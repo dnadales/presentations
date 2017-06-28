@@ -38,6 +38,7 @@ library
                      , persistent-postgresql
                      , lens
                      , monad-logger
+                     , exceptions
   default-language:    Haskell2010
 
 executable linksio-exe

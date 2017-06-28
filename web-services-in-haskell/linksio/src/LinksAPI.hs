@@ -6,7 +6,8 @@
 module LinksAPI (API, ServiceAPI) where
 
 import           Data.Swagger
-import           LinksData
+import           LinksData    hiding (Link)
+import qualified LinksData    as LD (Link)
 import           Servant
 
 type API = ServiceAPI :<|> SwaggerAPI
@@ -29,7 +30,7 @@ type GetLinksEP = LinksP
                :> QueryParam "sortBy" LinksSortCriterion
                :> QueryParam "first" Integer
                :> QueryParam "howMany" Integer
-               :> Get '[JSON] [LinkDetails]
+               :> Get '[JSON] [LD.Link]
 
 type LinksP = "links"
 

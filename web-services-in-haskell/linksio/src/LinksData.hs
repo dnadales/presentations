@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds                  #-}
 {-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
@@ -9,18 +10,14 @@
 {-# LANGUAGE TypeFamilies               #-}
 module LinksData
   ( Link (..)
-  , LinkAddReq
+  , LinkAddReq (..)
   , UserId
   , LinkId
   , Vote
   , LinksSortCriterion
-  , LinkDetails
   , migrateAll
-  , linkToAdd
   ) where
 
-import           Control.Lens
-import           Control.Monad.IO.Class      (liftIO)
 import           Data.Aeson
 import           Data.Aeson.TH
 import           Data.Swagger
@@ -33,10 +30,21 @@ import           GHC.Generics
 import           Web.HttpApiData
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
+User json
+  name String
+  email String
+  created UTCTime
+  UniqueEmail email
+  deriving Eq Show Generic
+
 Link
-    description String
-    url String
-    deriving Eq Show Generic
+  description String
+  url String
+  createdBy UserId
+  created UTCTime
+  votes Int
+  UniqueUrl url
+  deriving Eq Show Generic
 |]
 
 $(deriveJSON defaultOptions ''Link)
@@ -46,15 +54,10 @@ instance ToSchema Link
 instance ToSchema (Key a) where
   declareNamedSchema _ = return (NamedSchema Nothing mempty)
 
-newtype UserId = UserId Integer deriving (Eq, Show, Generic)
-
-$(deriveJSON defaultOptions ''UserId)
-
-instance ToSchema UserId
-
 data LinkAddReq = LinkAddReq
-  { userId    :: UserId
-  , linkToAdd :: Link
+  { creatorId          :: UserId
+  , newLinkDescription :: String
+  , newLinkUrl         :: String
   } deriving (Eq, Show, Generic)
 
 $(deriveJSON defaultOptions ''LinkAddReq)
@@ -82,13 +85,3 @@ instance ToParamSchema LinksSortCriterion
 instance FromHttpApiData LinksSortCriterion where
   parseUrlPiece = parseBoundedTextData
 
-data LinkDetails = LinkDetails
-  { addedBy     :: UserId
-  , link        :: Link
-  , linkVotes   :: Integer
-  , linkAddedOn :: UTCTime
-  } deriving (Eq, Show, Generic)
-
-$(deriveJSON defaultOptions ''LinkDetails)
-
-instance ToSchema LinkDetails

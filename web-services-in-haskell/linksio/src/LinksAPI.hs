@@ -6,12 +6,18 @@
 module LinksAPI (API, ServiceAPI) where
 
 import           Data.Swagger
-import           LinksData
+import           LinksData    hiding (Link)
+import qualified LinksData    as LD (Link)
 import           Servant
 
 type API = ServiceAPI :<|> SwaggerAPI
 
-type ServiceAPI = AddLinkEP :<|> VoteLinkEP :<|> GetLinksEP
+type ServiceAPI = AddUserEP :<|> AddLinkEP :<|> VoteLinkEP :<|> GetLinksEP
+
+-- | Add an user to the database.
+type AddUserEP = "users"
+              :> ReqBody '[JSON] UserAddReq
+              :> PostCreated '[JSON] UserId
 
 -- | Add a link to the bookmarks.
 type AddLinkEP = LinksP
@@ -29,7 +35,7 @@ type GetLinksEP = LinksP
                :> QueryParam "sortBy" LinksSortCriterion
                :> QueryParam "first" Integer
                :> QueryParam "howMany" Integer
-               :> Get '[JSON] [LinkDetails]
+               :> Get '[JSON] [LD.Link]
 
 type LinksP = "links"
 

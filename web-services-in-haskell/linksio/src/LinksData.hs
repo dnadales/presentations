@@ -1,14 +1,24 @@
-{-# LANGUAGE DataKinds       #-}
-{-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DataKinds                  #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE GADTs                      #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE QuasiQuotes                #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TypeFamilies               #-}
 module LinksData
-  ( Link
-  , LinkAddReq
+  ( Link (..)
+  , UserAddReq (..)
+  , LinkAddReq (..)
   , UserId
   , LinkId
-  , Vote
+  , Vote (..)
   , LinksSortCriterion
-  , LinkDetails
+  , migrateAll
+  , User (..)
+  , linkVotesField
   ) where
 
 import           Data.Aeson
@@ -16,38 +26,57 @@ import           Data.Aeson.TH
 import           Data.Swagger
 import           Data.Time.Clock
 import           Data.Typeable
+import           Database.Persist
+import           Database.Persist.Postgresql
+import           Database.Persist.TH
 import           GHC.Generics
 import           Web.HttpApiData
 
-data Link = Link
-  { linkDesc :: String
-  , linkUrl  :: String
-  } deriving (Eq, Show, Generic)
+share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
+User json
+  name String
+  email String
+  created UTCTime
+  UniqueEmail email
+  deriving Eq Show Generic
 
-$(deriveJSON defaultOptions ''Link)
+Link json
+  description String
+  url String
+  createdBy UserId
+  created UTCTime
+  votes Int
+  UniqueUrl url
+  deriving Eq Show Generic
+|]
+
+linkVotesField = LinkVotes
+
+-- $(deriveJSON defaultOptions ''Link)
 
 instance ToSchema Link
 
-newtype UserId = UserId Integer deriving (Eq, Show, Generic)
+instance ToSchema (Key a) where
+  declareNamedSchema _ = return (NamedSchema Nothing mempty)
 
-$(deriveJSON defaultOptions ''UserId)
+data UserAddReq = UserAddReq
+  { newUserName  :: String
+  , newUserEmail :: String
+  } deriving (Eq, Show, Generic)
 
-instance ToSchema UserId
+$(deriveJSON defaultOptions ''UserAddReq)
+
+instance ToSchema UserAddReq
 
 data LinkAddReq = LinkAddReq
-  { userId    :: UserId
-  , linkToAdd :: Link
+  { creatorId          :: UserId
+  , newLinkDescription :: String
+  , newLinkUrl         :: String
   } deriving (Eq, Show, Generic)
 
 $(deriveJSON defaultOptions ''LinkAddReq)
 
 instance ToSchema LinkAddReq
-
-newtype LinkId = LinkId Integer deriving (Eq, Show, Generic)
-
-$(deriveJSON defaultOptions ''LinkId)
-
-instance ToSchema LinkId
 
 data Vote = Vote
   { linkId     :: LinkId
@@ -70,13 +99,3 @@ instance ToParamSchema LinksSortCriterion
 instance FromHttpApiData LinksSortCriterion where
   parseUrlPiece = parseBoundedTextData
 
-data LinkDetails = LinkDetails
-  { addedBy     :: UserId
-  , link        :: Link
-  , linkVotes   :: Integer
-  , linkAddedOn :: UTCTime
-  } deriving (Eq, Show, Generic)
-
-$(deriveJSON defaultOptions ''LinkDetails)
-
-instance ToSchema LinkDetails

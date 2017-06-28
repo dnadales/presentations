@@ -8,13 +8,15 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 module LinksData
-  ( Link
+  ( Link (..)
   , LinkAddReq
   , UserId
   , LinkId
   , Vote
   , LinksSortCriterion
   , LinkDetails
+  , migrateAll
+  , linkToAdd
   ) where
 
 import           Control.Lens
@@ -36,11 +38,6 @@ Link
     url String
     deriving Eq Show Generic
 |]
-
--- data Link = Link
---   { linkDesc :: String
---   , linkUrl  :: String
---   } deriving (Eq, Show, Generic)
 
 $(deriveJSON defaultOptions ''Link)
 

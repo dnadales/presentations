@@ -1,5 +1,6 @@
 module LinksApp (startApp) where
 
+import           Database.Persist.Postgresql (runSqlPool)
 import           LinksAPI
 import           LinksDocs
 import           LinksServer
@@ -9,10 +10,13 @@ import           Network.Wai.Middleware.Cors
 import           Servant
 
 startApp :: IO ()
-startApp = run 8080 app
+startApp = do
+  env <- mkServerEnv
+  runSqlPool doMigrations (getPool env)
+  run 8080 (app env)
 
-app :: Application
-app = simpleCors $ serve api (linksServer mkServerEnv :<|> return swaggerDocs)
+app :: ServerEnv -> Application
+app env = simpleCors $ serve api (linksServer env :<|> return swaggerDocs)
 
 api :: Proxy API
 api = Proxy

@@ -115,6 +115,48 @@ swaggerDocs = toSwagger serviceAPI
 docker pull swaggerapi/swagger-ui
 docker run -p 80:8080 -d --rm swaggerapi/swagger-ui
 ```
+
+# Adding persistence
+
+## Getting a connection pool
+
+```haskell
+mkServerEnv :: IO ServerEnv
+mkServerEnv = ServerEnv <$> devPool
+  where devPool = runStdoutLoggingT (createPostgresqlPool connStr nrConn)
+        connStr = "host=localhost dbname=linksdb user=test password=test port=5432"
+        nrConn = 2
+```
+
+## Passing the connection pool to the main app
+
+```haskell
+newtype LinksHandler a = LinksHandler
+  { runLinksHandler :: ReaderT ServerEnv (ExceptT ServantErr IO) a
+  }
+
+data ServerEnv = ServerEnv
+  { getPool :: ConnectionPool }
+  
+startApp :: IO ()
+startApp = do
+  env <- mkServerEnv
+  run 8080 (app env)
+```
+
+## Implementing link addition
+
+```haskell
+runDb :: (MonadReader ServerEnv m, MonadIO m) => SqlPersistT IO b -> m b
+runDb query = do
+    pool <- asks getPool
+    liftIO $ runSqlPool query pool
+
+addLink :: LinkAddReq -> LinksHandler LinkId
+addLink req =
+  runDb $ insert $ (linkToAdd req)
+```
+
 # Conclusions
 ## Further reading
 

@@ -115,3 +115,7 @@ swaggerDocs = toSwagger serviceAPI
 docker pull swaggerapi/swagger-ui
 docker run -p 80:8080 -d --rm swaggerapi/swagger-ui
 ```
+# Conclusions
+## Further reading
+
+- [Haskell Persistent](https://www.yesodweb.com/book/persistent)

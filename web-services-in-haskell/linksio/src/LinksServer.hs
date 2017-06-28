@@ -39,7 +39,8 @@ linksHandlerNT env = Nat $ runHandler env
   where runHandler env act = runReaderT (runLinksHandler act) env
 
 linksServerT :: ServerT ServiceAPI LinksHandler
-linksServerT = addLink
+linksServerT = addUser
+         :<|> addLink
          :<|> voteLink
          :<|> getLinks
 
@@ -57,21 +58,28 @@ mkServerEnv = ServerEnv <$> devPool
         connStr = "host=localhost dbname=linksdb user=tester password=test port=5432"
         nrConn = 3
 
+addUser :: UserAddReq -> LinksHandler UserId
+addUser req = runDb $ do
+  currTime <- liftIO $ getCurrentTime
+  insert $ User (newUserName req) (newUserEmail req) currTime
+
 addLink :: LinkAddReq -> LinksHandler LinkId
 addLink req = runDb $ do
   getE (creatorId req)
-  undefined
-  -- currTime <- liftIO $ getCurrentTime
-  -- insert $ LD.Link (newLinkDescription req) (newLinkUrl req) (creatorId req) currTime 0
+  currTime <- liftIO $ getCurrentTime
+  insert $ LD.Link (newLinkDescription req) (newLinkUrl req) (creatorId req) currTime 0
 
 voteLink :: Vote -> LinksHandler NoContent
-voteLink = undefined
+voteLink vote = runDb $ do
+  update (linkId vote) [linkVotesField +=. c]
+  return NoContent
+  where c = if (voteUp vote) then 1 else -1
 
 getLinks :: Maybe LinksSortCriterion
          -> Maybe Integer
          -> Maybe Integer
          -> LinksHandler [LD.Link]
-getLinks = undefined
+getLinks _ _ _ = (map entityVal) <$> runDb (selectList [] [])
 
 -- * Utility functions to run db queries.
 --

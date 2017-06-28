@@ -10,12 +10,15 @@
 {-# LANGUAGE TypeFamilies               #-}
 module LinksData
   ( Link (..)
+  , UserAddReq (..)
   , LinkAddReq (..)
   , UserId
   , LinkId
-  , Vote
+  , Vote (..)
   , LinksSortCriterion
   , migrateAll
+  , User (..)
+  , linkVotesField
   ) where
 
 import           Data.Aeson
@@ -37,7 +40,7 @@ User json
   UniqueEmail email
   deriving Eq Show Generic
 
-Link
+Link json
   description String
   url String
   createdBy UserId
@@ -47,12 +50,23 @@ Link
   deriving Eq Show Generic
 |]
 
-$(deriveJSON defaultOptions ''Link)
+linkVotesField = LinkVotes
+
+-- $(deriveJSON defaultOptions ''Link)
 
 instance ToSchema Link
 
 instance ToSchema (Key a) where
   declareNamedSchema _ = return (NamedSchema Nothing mempty)
+
+data UserAddReq = UserAddReq
+  { newUserName  :: String
+  , newUserEmail :: String
+  } deriving (Eq, Show, Generic)
+
+$(deriveJSON defaultOptions ''UserAddReq)
+
+instance ToSchema UserAddReq
 
 data LinkAddReq = LinkAddReq
   { creatorId          :: UserId

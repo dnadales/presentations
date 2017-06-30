@@ -64,3 +64,11 @@ extra-package-dbs: []
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
+docker:
+    enable: false
+    auto-pull: false
+
+image:
+  container:
+    name: linksio
+    base: fpco/stack-run

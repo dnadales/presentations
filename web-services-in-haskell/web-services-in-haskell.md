@@ -4,18 +4,20 @@
 
 # Introduction
 
-## Goals
+## Goal
 
-- What to show...
-    - Setting things up
-    - Passing context around (Database connections).
-    - Using other web services.
-    - Generating documentation.
+- Show a possible way to use haskell for developing web-services
+- What I'll show:
+    - Set things up.
+    - Generate documentation.
+    - Pass context around (Database connections).
+    - Persist data.
     - Containerization.
 
 ## Haskell for web applications
 
 There are plenty of options:
+
 - Snapp
 - Yesod
 - Servant
@@ -34,6 +36,7 @@ There are plenty of options:
 ## Description
 
 Build a simple list application where:
+
 - Users can bookmark links.
 - Users can tag links.
 - User can vote on links.
@@ -68,7 +71,7 @@ type GetLinksEP = LinksP
                :> QueryParam "sortBy" LinksSortCriterion
                :> QueryParam "first" Integer
                :> QueryParam "howMany" Integer
-               :> Get '[JSON] [LinkDetails]
+               :> Get '[JSON] [Link]
 
 type LinksP = "links"
 ```
@@ -80,13 +83,13 @@ data LinksSortCriterion = DateAsc | DateDesc | RatingAsc | RatingDesc
   deriving (Eq, Show)
 $(deriveJSON defaultOptions ''LinksSortCriterion)
 
-data LinkDetails = LinkDetails
-  { addedBy     :: UserId
-  , link        :: Link
-  , linkVotes   :: Integer
-  , linkAddedOn :: UTCTime
-  } deriving (Eq, Show)
-$(deriveJSON defaultOptions ''LinkDetails)
+data Link = LinkDetails
+  { linkDescription :: String
+  , linUrl          :: String
+  , linkCreatedBy   :: UserId
+  , linkCreated     :: UTCTime
+  , linkVotes       :: Integer
+  } deriving (Eq, Show, Generic)
 ```
 
 ## Implementing the end-points
@@ -157,7 +160,48 @@ addLink req =
   runDb $ insert $ (linkToAdd req)
 ```
 
-# Conclusions
+# Dockerization
+
+## Configuring stack
+
+```yaml
+docker:
+    enable: false
+    auto-pull: false
+
+image:
+  container:
+    name: linksio
+    base: fpco/stack-run
+```
+
+## Pulling, building, and running
+
+```sh
+stack docker pull
+# If using sudo: sudo stack docker pull --allow-different-user
+stack build --docker
+# If using sudo: sudo stack build --docker --allow-different-user
+stack image container --docker
+# If using sudo: sudo stack image container --docker --allow-different-user
+docker run -it -p 8080:8080 linksio /usr/local/bin/linksio-exe
+```
+
+Might take a while the first time as it has to download and build all the
+dependencies.
+
+# Epilogue
+
+## Other features I did not show
+
+- Authentication in Servant.
+- Defining clients for web services (in Haskell and type-safe).
+
+
 ## Further reading
 
+- [Servant](http://haskell-servant.readthedocs.io/)
 - [Haskell Persistent](https://www.yesodweb.com/book/persistent)
+- [Combining Haskell and Persistent](http://www.parsonsmatt.org/2016/07/08/servant-persistent_updated.html)
+- [Yesod](https://www.yesodweb.com/)
+

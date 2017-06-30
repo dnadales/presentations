@@ -55,7 +55,7 @@ data ServerEnv = ServerEnv
 mkServerEnv :: IO ServerEnv
 mkServerEnv = ServerEnv <$> devPool
   where devPool = runStdoutLoggingT (createPostgresqlPool connStr nrConn)
-        connStr = "host=localhost dbname=linksdb user=tester password=test port=5432"
+        connStr = "host=linksio-db dbname=linksdb user=tester password=test port=5432"
         nrConn = 3
 
 addUser :: UserAddReq -> LinksHandler UserId

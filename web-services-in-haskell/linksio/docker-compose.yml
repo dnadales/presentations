@@ -1,0 +1,15 @@
+version: "3"
+services:
+  linksio-service:
+    image: linksio
+    entrypoint: /usr/local/bin/linksio-exe
+    ports:
+      - 9090:8080
+    links:
+      - linksio-db
+  linksio-db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=linksdb
+      - POSTGRES_USER=tester
+      - POSTGRES_PASSWORD=test

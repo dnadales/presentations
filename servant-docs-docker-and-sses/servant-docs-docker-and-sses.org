@@ -1,0 +1,147 @@
+* Haskell meetup: servant swagger, docker, and SSE's
+
+  - Servant is not the most mature web framework, but it is quite minimal.
+
+  - You can bring people up to speed quite fast if they are willing to abstract
+    away form all the *type level magic*.
+
+*** How does a servant-application code looks like
+
+***** The API
+      #+BEGIN_SRC haskell
+        type API = NewSessionEP :<|> SendEP :<|> EventsEP
+
+        type NewSessionEP = "session"
+                         :> "new"
+                         :> PostCreated '[JSON] SessionId -- 'SessionId' is a Haskell data-type
+
+        type SendEP = "session"
+                   :> Capture "sid" SessionId
+                   :> "echo"
+                   :> ReqBody '[JSON] Message -- 'Message' is another Haskell data-type.
+                   :> Post '[JSON] NoContent
+
+        type EventsEP = "session"
+                     :> Capture "sid" SessionId
+                     :> "events"
+                     :> Raw -- We can use lower level data-types
+      #+END_SRC
+
+***** The application
+      #+BEGIN_SRC haskell
+        -- type Application = Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
+        app :: Env -> Application
+        app env = simpleCors $ serve api server
+            where
+              api :: Proxy API
+              api = Proxy
+              server :: Server API
+              server = newSessionH :<|> sendH :<|> eventsH
+                  where
+                    newSessionH :: Handler SessionId
+                    newSessionH = undefined
+                    sendH :: SessionId -> Message -> Handler NoContent
+                    sendH = undefined
+                    eventsH :: SessionId -> Tagged Handler Application
+                    eventsH = undefined
+      #+END_SRC
+
+*** Generating the docs
+
+    #+BEGIN_SRC haskell
+      type API = ServiceAPI :<|> SwaggerAPI
+
+      type API = {- API types ... -}
+      type SwaggerAPI = "swagger.json" :> Get '[JSON] Swagger
+
+      app :: Application
+      app = simpleCors $ serve api ({- rest of the handlers ... -} :<|> return swaggerDocs)
+
+      swaggerDocs :: Swagger
+      swaggerDocs = toSwagger serviceAPI
+        where serviceAPI :: Proxy ServiceAPI
+              serviceAPI = Proxy
+    #+END_SRC
+
+*** Building the docker container with stack
+    #+BEGIN_SRC sh
+    sudo stack docker pull --allow-different-user
+    sudo stack build --docker --allow-different-user
+    sudo stack image container --docker --allow-different-user
+    #+END_SRC
+
+*** Alternative way of building a docker container
+
+    See [[/home/damian/Documents/github/capitanbatata/codeclimate-argon/Dockerfile][this file]].
+
+    Build it like this:
+
+    #+BEGIN_SRC sh
+      docker build \
+        --file Dockerfile \
+        --tag your-org/your-awesome-service .
+    #+END_SRC
+
+*** Running the container
+
+    - Using ~docker-compose~ to make things a bit easier. 
+    - In practice you'd use Kubernetes or something similar.
+
+    #+BEGIN_SRC sh
+      docker-compose up linksio-db
+      docker-compose up linksio-service
+    #+END_SRC
+
+*** Viewing the docs
+
+    - Start the ~swagger-ui~:
+      #+BEGIN_SRC sh
+      docker run -p 80:8080 -d --rm swaggerapi/swagger-ui
+      #+END_SRC
+    - Go to localhost.
+    - Enter: http://localhost:9090/swagger.json
+
+*** Server sent events
+    - What if you want to stream events from the server.
+    - But web-sockets are overkill.
+
+    #+BEGIN_SRC haskell
+      type EventsEP = "session" :> Capture "sid" SessionId :> "events" :> Raw
+
+      eventsH :: SessionId -> Tagged Handler Application
+      -- newtype Tagged k (s :: k) b :: forall k. k -> * -> *
+      -- Bottom line: in our case, what's left of '$' below has to return an 'Application'.
+      -- type Application = Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
+      eventsH sid = Tagged $ \req respond -> do
+          -- lookupChannel :: Env -> SessionId -> IO (Maybe (Chan ServerEvent))
+          mCh <- lookupChannel env sid
+          case mCh of
+              Nothing -> do
+                  let msg = "Could not find session with id: "
+                         <> TLE.encodeUtf8 (T.pack (show sid))
+                  respond $ responseLBS status404 [] msg
+              Just ch -> do
+                  ch' <- dupChan ch
+                  -- eventSourceAppChan :: Chan ServerEvent -> Application
+                  eventSourceAppChan ch req respond
+    #+END_SRC
+
+*** Let's try this out!
+
+    #+BEGIN_SRC sh
+      # Create a new session
+      curl -v -XPOST http://localhost:8080/session/new
+      # And subscribe to its events
+      curl -v http://localhost:8081/events/0
+    #+END_SRC
+
+    And let's post it from another terminal:
+
+    #+BEGIN_SRC sh
+      curl -v -XPOST http://localhost:8081/session/0/echo\
+           -H "Content-Type: application/json" -d '{"msgText": "Hello"}'
+      curl -v -XPOST http://localhost:8081/session/0/echo\
+           -H "Content-Type: application/json" -d '{"msgText": "SSE"}'
+      curl -v -XPOST http://localhost:8081/session/0/echo\
+           -H "Content-Type: application/json" -d '{"msgText": "World"}'
+    #+END_SRC

@@ -65,9 +65,9 @@
 
 *** Building the docker container with stack
     #+BEGIN_SRC sh
-    sudo stack docker pull --allow-different-user
-    sudo stack build --docker --allow-different-user
-    sudo stack image container --docker --allow-different-user
+    stack docker pull
+    sudo stack build --docker
+    sudo stack image container
     #+END_SRC
 
 *** Alternative way of building a docker container
@@ -128,9 +128,14 @@
 
 *** Let's try this out!
 
+    Fire up the server:
+    #+BEGIN_SRC sh
+      stack exec streaming-endpoints-exe  sse    
+    #+END_SRC
+
     #+BEGIN_SRC sh
       # Create a new session
-      curl -v -XPOST http://localhost:8080/session/new
+      curl -v -XPOST http://localhost:8081/session/new
       # And subscribe to its events
       curl -v http://localhost:8081/events/0
     #+END_SRC
@@ -144,4 +149,16 @@
            -H "Content-Type: application/json" -d '{"msgText": "SSE"}'
       curl -v -XPOST http://localhost:8081/session/0/echo\
            -H "Content-Type: application/json" -d '{"msgText": "World"}'
+    #+END_SRC
+
+    Let's go crazy:
+
+    #+BEGIN_SRC sh
+      while true; 
+      do       
+          curl -v http://localhost:8081/session/0/echo \
+               -H "Content-Type: application/json" \
+               -d '{"msgText": "All work and no play makes Jack a dull boy"}';
+          sleep 1;    
+      done
     #+END_SRC
